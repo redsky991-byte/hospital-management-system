@@ -1,8 +1,9 @@
 # MedCare Hospital Management System
 
-A complete, production-ready, multi-site Hospital Management System (HMS) built with **Python (Flask)** and SQLite, with a Bootstrap 5 frontend.
+A complete, production-ready, multi-site Hospital Management System (HMS) built with **Java (Spring Boot 3)** and SQLite, with a Bootstrap 5 frontend.
 
-> **The backend has been converted from Node.js/Express to Python/Flask.** The original Node.js files are still present for reference. Use `app.py` (Python) as the primary server.
+> **The primary backend is now Java/Spring Boot**, located in the `java-backend/` directory.  
+> The original Node.js (`server.js`) and Python (`app.py`) backends are kept for reference only.
 
 ---
 
@@ -39,23 +40,30 @@ A complete, production-ready, multi-site Hospital Management System (HMS) built 
 
 ## System Requirements
 
-- **Python 3.9 or later** (recommended: Python 3.11+)
-- pip (bundled with Python)
+- **Java 17 or later** (recommended: Java 21 LTS)
+- **Maven 3.6 or later** (or use the included `mvnw` wrapper)
 - Any OS: Linux, macOS, Windows
 
 ---
 
 ## Step-by-Step Installation & Configuration Guide
 
-### Step 1 — Install Python
+### Step 1 — Install Java
 
-Download and install Python **3.9 or later** from <https://python.org>.
+Download and install **Java 17+** from <https://adoptium.net> (Temurin) or any distribution.
 
 Verify:
 
 ```bash
-python --version   # should print 3.9 or higher
-pip --version
+java -version   # should print 17 or higher
+```
+
+Install **Maven 3.6+** from <https://maven.apache.org/download.cgi> or use `mvnw` (included in `java-backend/`).
+
+Verify:
+
+```bash
+mvn -version
 ```
 
 ---
@@ -69,64 +77,67 @@ cd hospital-management-system
 
 ---
 
-### Step 3 — Install Dependencies
+### Step 3 — Configure the Application
+
+All configuration lives in `java-backend/src/main/resources/application.properties`.  
+For production, override settings with environment variables or a local properties file.
+
+Key settings:
+
+| Property | Default | Description |
+|---|---|---|
+| `server.port` | `3000` | TCP port the server listens on |
+| `app.jwt.secret` | `medcare-secret-key-2024` | **Change in production.** Secret used to sign JWT tokens (override via `JWT_SECRET` env var) |
+| `spring.datasource.url` | `jdbc:sqlite:../data/hospital.db` | Path to the SQLite database file |
+| `app.jwt.expiration-ms` | `86400000` | JWT token lifetime in milliseconds (default: 24 hours) |
+
+To override the JWT secret without editing the file, set an environment variable:
 
 ```bash
-pip install -r requirements.txt
-```
-
-This installs Flask, flask-cors, PyJWT, bcrypt, and python-dotenv.
-
----
-
-### Step 4 — Configure Environment Variables
-
-Create a `.env` file in the project root:
-
-```bash
-# Windows
-copy .env.example .env
-
 # Linux / macOS
-cp .env.example .env
+export JWT_SECRET=replace-this-with-a-long-random-string
+
+# Windows (Command Prompt)
+set JWT_SECRET=replace-this-with-a-long-random-string
+
+# Windows (PowerShell)
+$env:JWT_SECRET="replace-this-with-a-long-random-string"
 ```
-
-Open `.env` and set the following values:
-
-```env
-PORT=3000
-JWT_SECRET=replace-this-with-a-long-random-string
-```
-
-| Variable     | Default       | Description                                              |
-|--------------|---------------|----------------------------------------------------------|
-| `PORT`       | `3000`        | TCP port the server listens on                           |
-| `JWT_SECRET` | —             | **Required.** Secret key used to sign authentication tokens. Use a random string of at least 32 characters. |
 
 > **Tip:** Generate a secure secret with:
 > ```bash
-> python -c "import secrets; print(secrets.token_hex(32))"
+> # Linux / macOS
+> openssl rand -hex 32
 > ```
 
 ---
 
-### Step 5 — Start the Server
+### Step 4 — Build and Start the Server
 
 ```bash
-python app.py
+cd java-backend
+mvn spring-boot:run
 ```
 
-You should see:
+Or build a self-contained JAR first, then run it:
+
+```bash
+cd java-backend
+mvn package -DskipTests
+java -jar target/hospital-management-system-1.1.0.jar
+```
+
+You should see Spring Boot's startup log ending with:
 
 ```
-MedCare HMS running on http://localhost:3000
+Started HmsApplication in X.XXX seconds
 ```
 
 Open **http://localhost:3000** in your browser.
 
 ---
 
-### Step 6 — First Login
+### Step 5 — First Login
 
 | Field    | Value              |
 |----------|--------------------|
@@ -138,33 +149,33 @@ Open **http://localhost:3000** in your browser.
 
 ---
 
-### Step 7 — Initial Application Configuration (Admin UI)
+### Step 6 — Initial Application Configuration (Admin UI)
 
 All post-install configuration is done inside the app under **Settings** (Admin only).
 
-#### 7a — Add a Hospital Site
+#### 6a — Add a Hospital Site
 
 1. Go to **Settings → Sites**.
 2. Click **Add Site**.
 3. Enter the site name (e.g., *Main Hospital*) and click **Save**.
 
-#### 7b — Add Wards
+#### 6b — Add Wards
 
 1. Go to **Settings → Wards**.
 2. Select the site, enter a ward name (e.g., *General Ward*), and click **Save**.
 
-#### 7c — Add Departments
+#### 6c — Add Departments
 
 1. Go to **Settings → Departments**.
 2. Select the site, enter a department name (e.g., *Cardiology*), and click **Save**.
 
-#### 7d — Create Staff Accounts
+#### 6d — Create Staff Accounts
 
 1. Go to **Users → Add User**.
 2. Fill in name, email, password, select a role (**Admin / Doctor / Nurse**) and assign a site.
 3. Click **Save**.
 
-#### 7e — Configure System Settings
+#### 6e — Configure System Settings
 
 1. Go to **Settings → Language & Region**.
 2. Choose the **Language** (English, German, French, Dutch, Urdu, Hindi, Arabic, Chinese, Japanese).
@@ -200,13 +211,17 @@ All post-install configuration is done inside the app under **Settings** (Admin 
 
 ---
 
-## Environment Variables Reference
+## Configuration Reference
 
-| Variable     | Required | Default       | Description                        |
-|--------------|----------|---------------|------------------------------------|
-| `PORT`       | No       | `3000`        | HTTP port to listen on             |
-| `JWT_SECRET` | Yes      | —             | Secret for signing JWT tokens      |
-| `NODE_ENV`   | No       | `development` | Set to `production` for live deployments |
+### `java-backend/src/main/resources/application.properties`
+
+| Property | Required | Default | Description |
+|---|---|---|---|
+| `server.port` | No | `3000` | HTTP port to listen on |
+| `app.jwt.secret` | **Yes** | `medcare-secret-key-2024` | Secret for signing JWT tokens. Set via `JWT_SECRET` env var in production |
+| `app.jwt.expiration-ms` | No | `86400000` | Token lifetime in ms (24 h) |
+| `spring.datasource.url` | No | `jdbc:sqlite:../data/hospital.db` | SQLite database path (JDBC URL) |
+| `spring.servlet.multipart.max-file-size` | No | `50MB` | Max upload size for backup restore |
 
 ---
 
@@ -242,25 +257,34 @@ All shortcut keys work on any page once you are logged in. Press `?` at any time
 ## Project Structure
 
 ```
-├── server.js              # Express application entry point
-├── package.json
-├── .env                   # Environment config (create from .env.example)
-├── database/
-│   ├── db.js              # SQLite connection + seeding
-│   └── schema.sql         # Database schema
-├── routes/                # API route handlers
-│   ├── auth.js
-│   ├── patients.js
-│   ├── appointments.js
-│   ├── billing.js
-│   ├── users.js
-│   ├── audit.js
-│   └── settings.js
-├── middleware/
-│   ├── authMiddleware.js  # JWT verification + role guard
-│   └── auditMiddleware.js # Automatic action logging
-├── public/                # Static frontend files
-│   ├── index.html         # Login page
+├── java-backend/                   # ✅ PRIMARY backend — Java / Spring Boot 3
+│   ├── pom.xml                     # Maven build descriptor
+│   ├── src/main/
+│   │   ├── java/com/medcare/hms/
+│   │   │   ├── HmsApplication.java         # Application entry point
+│   │   │   ├── config/
+│   │   │   │   ├── DatabaseInitializer.java # Schema creation + seeding
+│   │   │   │   ├── JwtUtil.java             # JWT sign/verify helpers
+│   │   │   │   ├── SecurityConfig.java      # Spring Security filter chain
+│   │   │   │   └── WebConfig.java           # CORS + static resource mapping
+│   │   │   ├── controller/
+│   │   │   │   ├── AuthController.java
+│   │   │   │   ├── PatientController.java
+│   │   │   │   ├── AppointmentController.java
+│   │   │   │   ├── BillingController.java
+│   │   │   │   ├── UserController.java
+│   │   │   │   ├── AuditController.java
+│   │   │   │   └── SettingsController.java
+│   │   │   ├── filter/
+│   │   │   │   └── JwtAuthFilter.java       # JWT request filter
+│   │   │   ├── interceptor/
+│   │   │   │   └── AuditInterceptor.java    # Automatic action logging
+│   │   │   └── model/
+│   │   │       └── AuthUser.java            # Authenticated user principal
+│   │   └── resources/
+│   │       └── application.properties       # All app configuration
+├── public/                         # Static frontend (shared by all backends)
+│   ├── index.html                  # Login page
 │   ├── dashboard.html
 │   ├── patients.html
 │   ├── appointments.html
@@ -269,15 +293,20 @@ All shortcut keys work on any page once you are logged in. Press `?` at any time
 │   ├── audit.html
 │   ├── settings.html
 │   ├── about.html
-│   ├── help.html          # User manual & shortcut reference
+│   ├── help.html                   # User manual & shortcut reference
 │   ├── css/style.css
 │   ├── js/
 │   │   ├── api.js
 │   │   ├── auth.js
-│   │   ├── shortcuts.js   # Global keyboard shortcut handler
+│   │   ├── shortcuts.js            # Global keyboard shortcut handler
 │   │   └── ...
-│   └── sw.js              # Service Worker (PWA/offline)
-└── data/                  # SQLite database (auto-created, git-ignored)
+│   └── sw.js                       # Service Worker (PWA/offline)
+├── database/
+│   └── schema.sql                  # Reference SQL schema
+├── data/                           # SQLite database (auto-created, git-ignored)
+├── server.js                       # (Legacy) Node.js/Express backend
+├── app.py                          # (Legacy) Python/Flask backend
+└── requirements.txt                # (Legacy) Python dependencies
 ```
 
 ---
@@ -377,14 +406,14 @@ MedCare HMS provides a one-click backup and restore interface under **Settings �
 2. Click **Download Backup**.
 3. A `.db` file (e.g. `hospital-backup-2025-06-01T12-00-00.db`) is downloaded to your machine.
 
-> The backup uses `better-sqlite3`'s `db.backup()` API for a WAL-safe, consistent snapshot — no data is missed even under write load.
+> The backup streams the live SQLite file as a safe, byte-for-byte snapshot served directly by the Spring Boot backend.
 
 ### Restore from Backup
 
 1. Go to **Settings → Backup & Restore**.
 2. Click **Choose Backup File** and select a previously downloaded `.db` file.
 3. Click **Restore Database**.
-4. The server validates the file, replaces the live database, and exits so a process manager (PM2 or systemd) can restart it automatically.
+4. The server validates the file, replaces the live database, and exits so a process manager (systemd, etc.) can restart it automatically.
 5. Wait a few seconds, then reload the page.
 
 > ⚠️ **Restoring replaces ALL current data.** Always download a fresh backup before restoring.
@@ -395,30 +424,62 @@ MedCare HMS provides a one-click backup and restore interface under **Settings �
 
 ### Production checklist
 
-1. Set a strong `JWT_SECRET` in `.env`
-2. Change the default admin password
-3. Use a process manager such as [PM2](https://pm2.keymetrics.io/):
+1. Set a strong `JWT_SECRET` environment variable (or update `app.jwt.secret` in `application.properties`)
+2. Change the default admin password immediately after first login
+3. Build a fat JAR for deployment:
 
 ```bash
-npm install -g pm2
-pm2 start server.js --name medcare-hms
-pm2 save
-pm2 startup
+cd java-backend
+mvn package -DskipTests
+java -jar target/hospital-management-system-1.1.0.jar
 ```
 
-4. Place behind a reverse proxy (Nginx/Apache) for HTTPS
-5. Back up the `data/hospital.db` file regularly
+4. Use a process manager such as [systemd](https://systemd.io/) or run as a service:
+
+```ini
+# /etc/systemd/system/medcare-hms.service
+[Unit]
+Description=MedCare Hospital Management System
+After=network.target
+
+[Service]
+User=medcare
+WorkingDirectory=/opt/medcare
+ExecStart=/usr/bin/java -jar /opt/medcare/java-backend/target/hospital-management-system-1.1.0.jar
+Environment=JWT_SECRET=your-strong-secret-here
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now medcare-hms
+```
+
+5. Place behind a reverse proxy (Nginx/Apache) for HTTPS
+6. Back up the `data/hospital.db` file regularly
 
 ### Docker (optional)
 
 ```dockerfile
-FROM node:20-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --omit=dev
-COPY . .
+COPY java-backend/target/hospital-management-system-1.1.0.jar app.jar
+COPY public/ public/
 EXPOSE 3000
-CMD ["node", "server.js"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
+```
+
+Build and run:
+
+```bash
+# Build JAR first
+cd java-backend && mvn package -DskipTests && cd ..
+
+docker build -t medcare-hms .
+docker run -p 3000:3000 -e JWT_SECRET=your-secret medcare-hms
 ```
 
 ---
@@ -427,11 +488,14 @@ CMD ["node", "server.js"]
 
 | Problem | Solution |
 |---------|----------|
-| *Port already in use* | Change `PORT` in `.env` or stop the conflicting process |
-| *Cannot find module 'better-sqlite3'* | Run `npm install` again; on Windows ensure build tools are installed (`npm install --global windows-build-tools`) |
-| *JWT errors / "Unauthorized"* | Ensure `JWT_SECRET` is set in `.env` and matches across restarts |
-| *Database locked* | Only one process should access the SQLite file; restart the server |
+| *Port already in use* | Change `server.port` in `application.properties` or set `-Dserver.port=XXXX` on the command line |
+| *`java: command not found`* | Install Java 17+ and ensure it is on your `PATH` |
+| *`mvn: command not found`* | Install Maven 3.6+ or use `./mvnw` (Maven wrapper) inside `java-backend/` |
+| *JWT errors / "Unauthorized"* | Ensure `JWT_SECRET` env var is set and consistent across restarts; do not change it while users are logged in |
+| *Database locked* | Only one process should access the SQLite file; stop any other server instance |
+| *SQLite file not found* | The database is auto-created at `data/hospital.db` relative to the working directory; run from the `java-backend/` folder or adjust `spring.datasource.url` |
 | *PWA not updating* | Clear browser cache or unregister the service worker in DevTools → Application |
+| *`OutOfMemoryError` on startup* | Increase heap: `java -Xmx512m -jar app.jar` |
 
 ---
 
