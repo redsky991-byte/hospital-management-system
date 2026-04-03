@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - MedCare HMS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><i class="fas fa-hospital"></i></div>
+      <div>
+        <div class="brand-text">MedCare</div>
+        <div class="brand-sub">Hospital Management</div>
+      </div>
+    </div>
+    <div class="sidebar-nav-wrapper">
+      <ul id="sidebar-nav"></ul>
+    </div>
+    <div class="sidebar-footer">
+      <i class="fas fa-code me-1"></i> Developed by Zulfiqar Ali
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h5 class="page-title"><i class="fas fa-tachometer-alt me-2 text-primary"></i>Dashboard</h5>
+      </div>
+      <div class="topbar-right">
+        <span class="site-badge"><i class="fas fa-hospital-alt me-1"></i><span id="site-name"></span></span>
+        <div class="user-info">
+          <div class="user-avatar"><i class="fas fa-user"></i></div>
+          <div class="user-details">
+            <div class="user-display-name" id="user-name">Loading...</div>
+            <div class="user-role-badge" id="user-role"></div>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-outline-danger" onclick="logout()">
+          <i class="fas fa-sign-out-alt me-1"></i>Logout
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="page-content">
+      <!-- Stats Row -->
+      <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+          <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="stat-value text-primary" id="stat-patients">0</div>
+                <div class="stat-label">Total Patients</div>
+              </div>
+              <div class="stat-icon" style="background:#e8f0fe">
+                <i class="fas fa-user-injured text-primary"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="stat-value text-success" id="stat-appointments">0</div>
+                <div class="stat-label">Today's Appointments</div>
+              </div>
+              <div class="stat-icon" style="background:#e6f4ea">
+                <i class="fas fa-calendar-check text-success"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="stat-value text-warning" id="stat-bills">0</div>
+                <div class="stat-label">Pending Bills</div>
+              </div>
+              <div class="stat-icon" style="background:#fff3e0">
+                <i class="fas fa-file-invoice-dollar text-warning"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+          <div class="stat-card">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="stat-value text-danger" id="stat-users">0</div>
+                <div class="stat-label">System Users</div>
+              </div>
+              <div class="stat-icon" style="background:#fce8e8">
+                <i class="fas fa-users-cog text-danger"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content Row -->
+      <div class="row g-4">
+        <!-- Appointments Table -->
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header d-flex align-items-center justify-content-between">
+              <span><i class="fas fa-calendar-day me-2 text-primary"></i>Today's Appointments</span>
+              <a href="appointments.html" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="table mb-0">
+                  <thead>
+                    <tr>
+                      <th>Patient</th>
+                      <th>Doctor</th>
+                      <th>Department</th>
+                      <th>Time</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recent-appointments">
+                    <tr><td colspan="5" class="text-center text-muted py-4">Loading...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chart -->
+        <div class="col-lg-4">
+          <div class="card h-100">
+            <div class="card-header">
+              <i class="fas fa-chart-pie me-2 text-primary"></i>Appointment Status
+            </div>
+            <div class="card-body d-flex align-items-center justify-content-center">
+              <canvas id="apptChart" style="max-height:220px"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="row g-4 mt-2">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header"><i class="fas fa-bolt me-2 text-primary"></i>Quick Actions</div>
+            <div class="card-body">
+              <div class="d-flex flex-wrap gap-2">
+                <a href="patients.html" class="btn btn-outline-primary"><i class="fas fa-user-plus me-2"></i>Add Patient</a>
+                <a href="appointments.html" class="btn btn-outline-success"><i class="fas fa-calendar-plus me-2"></i>New Appointment</a>
+                <a href="billing.html" class="btn btn-outline-warning"><i class="fas fa-file-invoice me-2"></i>Create Invoice</a>
+                <a href="users.html" class="btn btn-outline-danger"><i class="fas fa-user-cog me-2"></i>Manage Users</a>
+                <a href="settings.html" class="btn btn-outline-secondary"><i class="fas fa-cog me-2"></i>Settings</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/dashboard.js"></script>
+</body>
+</html>

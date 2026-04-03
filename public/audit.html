@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Audit Logs - MedCare HMS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><i class="fas fa-hospital"></i></div>
+      <div>
+        <div class="brand-text">MedCare</div>
+        <div class="brand-sub">Hospital Management</div>
+      </div>
+    </div>
+    <div class="sidebar-nav-wrapper">
+      <ul id="sidebar-nav"></ul>
+    </div>
+    <div class="sidebar-footer">
+      <i class="fas fa-code me-1"></i> Developed by Zulfiqar Ali
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h5 class="page-title"><i class="fas fa-clipboard-list me-2 text-primary"></i>Audit Logs</h5>
+      </div>
+      <div class="topbar-right">
+        <span class="site-badge"><i class="fas fa-hospital-alt me-1"></i><span id="site-name"></span></span>
+        <div class="user-info">
+          <div class="user-avatar"><i class="fas fa-user"></i></div>
+          <div class="user-details">
+            <div class="user-display-name" id="user-name">Loading...</div>
+            <div class="user-role-badge" id="user-role"></div>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-outline-danger" onclick="logout()">
+          <i class="fas fa-sign-out-alt me-1"></i>Logout
+        </button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <!-- Filters -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">From Date</label>
+              <input type="date" class="form-control form-control-sm" id="filter-from">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">To Date</label>
+              <input type="date" class="form-control form-control-sm" id="filter-to">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Module</label>
+              <input type="text" class="form-control form-control-sm" id="filter-module" placeholder="e.g. patients">
+            </div>
+            <div class="col-md-2">
+              <label class="form-label">Action</label>
+              <select class="form-select form-select-sm" id="filter-action">
+                <option value="">All Actions</option>
+                <option value="CREATE">CREATE</option>
+                <option value="UPDATE">UPDATE</option>
+                <option value="DELETE">DELETE</option>
+                <option value="PATCH">PATCH</option>
+              </select>
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary btn-sm w-100" id="filter-btn">
+                <i class="fas fa-filter me-1"></i>Apply Filter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card">
+        <div class="card-header">
+          <span class="section-title"><i class="fas fa-history me-2"></i>Activity Log</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>User</th>
+                  <th>Action</th>
+                  <th>Module</th>
+                  <th>Record ID</th>
+                  <th>IP Address</th>
+                </tr>
+              </thead>
+              <tbody id="audit-tbody">
+                <tr><td colspan="6" class="text-center text-muted py-4">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/audit.js"></script>
+</body>
+</html>

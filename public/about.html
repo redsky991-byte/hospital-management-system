@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About - MedCare HMS</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <nav class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon"><i class="fas fa-hospital"></i></div>
+      <div>
+        <div class="brand-text">MedCare</div>
+        <div class="brand-sub">Hospital Management</div>
+      </div>
+    </div>
+    <div class="sidebar-nav-wrapper">
+      <ul id="sidebar-nav"></ul>
+    </div>
+    <div class="sidebar-footer">
+      <i class="fas fa-code me-1"></i> Developed by Zulfiqar Ali
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <h5 class="page-title"><i class="fas fa-info-circle me-2 text-primary"></i>About</h5>
+      </div>
+      <div class="topbar-right">
+        <span class="site-badge"><i class="fas fa-hospital-alt me-1"></i><span id="site-name"></span></span>
+        <div class="user-info">
+          <div class="user-avatar"><i class="fas fa-user"></i></div>
+          <div class="user-details">
+            <div class="user-display-name" id="user-name">Loading...</div>
+            <div class="user-role-badge" id="user-role"></div>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-outline-danger" onclick="logout()">
+          <i class="fas fa-sign-out-alt me-1"></i>Logout
+        </button>
+      </div>
+    </header>
+
+    <div class="page-content">
+      <div class="row g-4">
+        <!-- App Info -->
+        <div class="col-lg-6">
+          <div class="card h-100">
+            <div class="card-body text-center p-5">
+              <div class="login-logo mx-auto mb-4">
+                <i class="fas fa-hospital"></i>
+              </div>
+              <h2 class="fw-bold text-primary mb-1">MedCare Hospital Management System</h2>
+              <p class="text-muted mb-3">Version 1.0.0</p>
+              <span class="badge bg-success px-3 py-2 mb-4">Production Ready</span>
+              <p class="text-muted">
+                A complete, full-featured hospital management solution built with modern web technologies.
+                Manage patients, appointments, billing, staff and more from a single platform.
+              </p>
+              <div class="d-flex justify-content-center gap-3 mt-4">
+                <div class="text-center">
+                  <div class="fs-4 fw-bold text-primary">3</div>
+                  <div class="small text-muted">User Roles</div>
+                </div>
+                <div class="text-center">
+                  <div class="fs-4 fw-bold text-success">8+</div>
+                  <div class="small text-muted">Modules</div>
+                </div>
+                <div class="text-center">
+                  <div class="fs-4 fw-bold text-warning">PWA</div>
+                  <div class="small text-muted">Offline Support</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features -->
+        <div class="col-lg-6">
+          <div class="card h-100">
+            <div class="card-header">
+              <strong><i class="fas fa-star me-2 text-warning"></i>Key Features</strong>
+            </div>
+            <div class="card-body">
+              <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-user-injured"></i></div>
+                <div>
+                  <div class="fw-semibold">Patient Management</div>
+                  <div class="text-muted small">Complete patient records with search and pagination</div>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-calendar-check"></i></div>
+                <div>
+                  <div class="fw-semibold">Appointment Scheduling</div>
+                  <div class="text-muted small">Doctor and department-based scheduling with print slips</div>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-file-invoice-dollar"></i></div>
+                <div>
+                  <div class="fw-semibold">Billing &amp; Invoicing</div>
+                  <div class="text-muted small">Line items, discounts, tax, payment recording, print</div>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-users-cog"></i></div>
+                <div>
+                  <div class="fw-semibold">User Management</div>
+                  <div class="text-muted small">Role-based access control (Admin, Doctor, Nurse)</div>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-clipboard-list"></i></div>
+                <div>
+                  <div class="fw-semibold">Audit Logging</div>
+                  <div class="text-muted small">Track all create, update and delete actions</div>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-wifi"></i></div>
+                <div>
+                  <div class="fw-semibold">Offline / PWA Support</div>
+                  <div class="text-muted small">Service worker caching for offline availability</div>
+                </div>
+              </div>
+              <div class="feature-item">
+                <div class="feature-icon"><i class="fas fa-building"></i></div>
+                <div>
+                  <div class="fw-semibold">Multi-Site Architecture</div>
+                  <div class="text-muted small">Manage multiple hospital sites and departments</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <strong><i class="fas fa-code me-2 text-primary"></i>Technology Stack</strong>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                <div class="col-6">
+                  <div class="p-3 bg-light rounded text-center">
+                    <i class="fab fa-node-js fa-2x text-success mb-2"></i>
+                    <div class="fw-semibold">Node.js</div>
+                    <div class="small text-muted">Backend Runtime</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="p-3 bg-light rounded text-center">
+                    <i class="fas fa-server fa-2x text-primary mb-2"></i>
+                    <div class="fw-semibold">Express.js</div>
+                    <div class="small text-muted">Web Framework</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="p-3 bg-light rounded text-center">
+                    <i class="fas fa-database fa-2x text-warning mb-2"></i>
+                    <div class="fw-semibold">SQLite</div>
+                    <div class="small text-muted">Database</div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="p-3 bg-light rounded text-center">
+                    <i class="fab fa-bootstrap fa-2x text-purple mb-2" style="color:#7952b3"></i>
+                    <div class="fw-semibold">Bootstrap 5</div>
+                    <div class="small text-muted">UI Framework</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Developer Info -->
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-header">
+              <strong><i class="fas fa-user-tie me-2 text-primary"></i>Developer Information</strong>
+            </div>
+            <div class="card-body">
+              <div class="d-flex align-items-center gap-3 mb-4">
+                <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
+                     style="width:64px;height:64px;font-size:1.5rem">ZA</div>
+                <div>
+                  <h5 class="mb-0">Zulfiqar Ali</h5>
+                  <p class="text-muted mb-0">Full Stack Developer</p>
+                </div>
+              </div>
+              <div class="mb-3">
+                <i class="fas fa-globe me-2 text-primary"></i>
+                <a href="http://www.maxtechfix.com" target="_blank" class="text-decoration-none">www.maxtechfix.com</a>
+              </div>
+              <div class="mb-3">
+                <i class="fas fa-shield-alt me-2 text-success"></i>
+                <span class="text-muted">JWT Authentication &amp; Role-Based Access</span>
+              </div>
+              <div class="mb-3">
+                <i class="fas fa-lock me-2 text-warning"></i>
+                <span class="text-muted">bcryptjs Password Hashing</span>
+              </div>
+              <div class="alert alert-info mt-3 mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Default Admin:</strong> admin@hospital.com / Admin@123
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      renderNav('about');
+      renderUserInfo();
+    });
+  </script>
+</body>
+</html>
