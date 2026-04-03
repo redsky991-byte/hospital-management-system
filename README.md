@@ -28,6 +28,7 @@ A complete, production-ready, multi-site Hospital Management System (HMS) built 
 - **Multi-Site SaaS** – Single instance manages multiple hospital facilities
 - **Offline / PWA** – Service Worker caches assets for offline availability
 - **Print Support** – Clean print stylesheets on every procedure page
+- **Keyboard Shortcuts** – Global hotkeys for fast navigation and actions
 
 ---
 
@@ -39,24 +40,136 @@ A complete, production-ready, multi-site Hospital Management System (HMS) built 
 
 ---
 
-## Installation
+## Step-by-Step Installation & Configuration Guide
+
+### Step 1 — Install Node.js
+
+Download and install Node.js **v18 or later** from <https://nodejs.org>.
+
+Verify:
 
 ```bash
-# 1. Clone the repository
-git clone <repo-url>
+node -v   # should print v18.x or higher
+npm -v    # should print 8.x or higher
+```
+
+---
+
+### Step 2 — Clone the Repository
+
+```bash
+git clone https://github.com/redsky991-byte/hospital-management-system.git
 cd hospital-management-system
+```
 
-# 2. Install dependencies
+---
+
+### Step 3 — Install Dependencies
+
+```bash
 npm install
+```
 
-# 3. (Optional) Configure environment
-cp .env.example .env   # edit PORT, JWT_SECRET as needed
+This installs Express, better-sqlite3, jsonwebtoken, bcryptjs, cors, dotenv, and uuid.
 
-# 4. Start the server
+---
+
+### Step 4 — Configure Environment Variables
+
+Create a `.env` file in the project root:
+
+```bash
+# Windows
+copy .env.example .env
+
+# Linux / macOS
+cp .env.example .env
+```
+
+Open `.env` and set the following values:
+
+```env
+PORT=3000
+JWT_SECRET=replace-this-with-a-long-random-string
+```
+
+| Variable     | Default | Description                                              |
+|--------------|---------|----------------------------------------------------------|
+| `PORT`       | `3000`  | TCP port the server listens on                           |
+| `JWT_SECRET` | —       | **Required.** Secret key used to sign authentication tokens. Use a random string of at least 32 characters. |
+
+> **Tip:** Generate a secure secret with:
+> ```bash
+> node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+> ```
+
+---
+
+### Step 5 — Start the Server
+
+```bash
 npm start
 ```
 
+You should see:
+
+```
+MedCare HMS running on http://localhost:3000
+```
+
 Open **http://localhost:3000** in your browser.
+
+---
+
+### Step 6 — First Login
+
+| Field    | Value              |
+|----------|--------------------|
+| Email    | admin@hospital.com |
+| Password | Admin@123          |
+| Role     | Admin              |
+
+> ⚠️ **Change the admin password immediately** after first login via **Users → Edit**.
+
+---
+
+### Step 7 — Initial Application Configuration (Admin UI)
+
+All post-install configuration is done inside the app under **Settings** (Admin only).
+
+#### 7a — Add a Hospital Site
+
+1. Go to **Settings → Sites**.
+2. Click **Add Site**.
+3. Enter the site name (e.g., *Main Hospital*) and click **Save**.
+
+#### 7b — Add Wards
+
+1. Go to **Settings → Wards**.
+2. Select the site, enter a ward name (e.g., *General Ward*), and click **Save**.
+
+#### 7c — Add Departments
+
+1. Go to **Settings → Departments**.
+2. Select the site, enter a department name (e.g., *Cardiology*), and click **Save**.
+
+#### 7d — Create Staff Accounts
+
+1. Go to **Users → Add User**.
+2. Fill in name, email, password, select a role (**Admin / Doctor / Nurse**) and assign a site.
+3. Click **Save**.
+
+---
+
+### Step 8 — Daily Workflow
+
+| Task                      | Where to go                   |
+|---------------------------|-------------------------------|
+| Register a new patient    | Patients → Add Patient        |
+| Book an appointment       | Appointments → New Appointment|
+| Issue a bill              | Billing → Create Invoice      |
+| Record a payment          | Billing → View → Record Payment |
+| Review activity           | Audit Logs                    |
 
 ---
 
@@ -72,20 +185,41 @@ Open **http://localhost:3000** in your browser.
 
 ---
 
-## Configuration
+## Environment Variables Reference
 
-All configuration is done through the **Settings** page (Admin only) — no code changes required:
+| Variable     | Required | Default | Description                        |
+|--------------|----------|---------|------------------------------------|
+| `PORT`       | No       | `3000`  | HTTP port to listen on             |
+| `JWT_SECRET` | Yes      | —       | Secret for signing JWT tokens      |
 
-- **Sites** – Add hospital branches/facilities
-- **Wards** – Add wards per site
-- **Departments** – Add clinical departments per site
+---
 
-Environment variables (`.env`):
+## Keyboard Shortcuts
 
-```
-PORT=3000
-JWT_SECRET=your-strong-secret-here
-```
+All shortcut keys work on any page once you are logged in. Press `?` at any time to open the in-app shortcut reference.
+
+### Navigation
+
+| Shortcut | Action             |
+|----------|--------------------|
+| `G` then `D` | Go to Dashboard    |
+| `G` then `P` | Go to Patients     |
+| `G` then `A` | Go to Appointments |
+| `G` then `B` | Go to Billing      |
+| `G` then `U` | Go to Users        |
+| `G` then `L` | Go to Audit Logs   |
+| `G` then `S` | Go to Settings     |
+| `G` then `H` | Go to Help         |
+
+### Actions
+
+| Shortcut       | Action                              |
+|----------------|-------------------------------------|
+| `N`            | Open "New / Add" modal on current page |
+| `Ctrl + F` / `/`    | Focus the search box           |
+| `Escape`       | Close any open modal                |
+| `Ctrl + P`     | Print current view                  |
+| `?`            | Show / hide keyboard shortcut help  |
 
 ---
 
@@ -94,6 +228,7 @@ JWT_SECRET=your-strong-secret-here
 ```
 ├── server.js              # Express application entry point
 ├── package.json
+├── .env                   # Environment config (create from .env.example)
 ├── database/
 │   ├── db.js              # SQLite connection + seeding
 │   └── schema.sql         # Database schema
@@ -118,8 +253,13 @@ JWT_SECRET=your-strong-secret-here
 │   ├── audit.html
 │   ├── settings.html
 │   ├── about.html
+│   ├── help.html          # User manual & shortcut reference
 │   ├── css/style.css
-│   ├── js/                # Frontend JavaScript modules
+│   ├── js/
+│   │   ├── api.js
+│   │   ├── auth.js
+│   │   ├── shortcuts.js   # Global keyboard shortcut handler
+│   │   └── ...
 │   └── sw.js              # Service Worker (PWA/offline)
 └── data/                  # SQLite database (auto-created, git-ignored)
 ```
@@ -178,6 +318,18 @@ COPY . .
 EXPOSE 3000
 CMD ["node", "server.js"]
 ```
+
+---
+
+## Troubleshooting
+
+| Problem | Solution |
+|---------|----------|
+| *Port already in use* | Change `PORT` in `.env` or stop the conflicting process |
+| *Cannot find module 'better-sqlite3'* | Run `npm install` again; on Windows ensure build tools are installed (`npm install --global windows-build-tools`) |
+| *JWT errors / "Unauthorized"* | Ensure `JWT_SECRET` is set in `.env` and matches across restarts |
+| *Database locked* | Only one process should access the SQLite file; restart the server |
+| *PWA not updating* | Clear browser cache or unregister the service worker in DevTools → Application |
 
 ---
 
