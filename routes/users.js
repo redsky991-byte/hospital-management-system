@@ -9,13 +9,13 @@ const { auditLog } = require('../middleware/auditMiddleware');
 router.use(authenticate, requireRole('admin'), auditLog);
 
 router.get('/', (req, res) => {
-  const users = db.prepare(`SELECT u.id, u.name, u.email, u.role, u.is_active, u.created_at, u.site_id, s.name as site_name
+  const users = db.prepare(`SELECT u.id, u.name, u.email, u.role, u.is_active, u.created_at, u.last_login_at, u.site_id, s.name as site_name
     FROM users u LEFT JOIN sites s ON u.site_id = s.id ORDER BY u.created_at DESC`).all();
   res.json(users);
 });
 
 router.get('/:id', (req, res) => {
-  const user = db.prepare(`SELECT u.id, u.name, u.email, u.role, u.is_active, u.created_at, u.site_id, s.name as site_name
+  const user = db.prepare(`SELECT u.id, u.name, u.email, u.role, u.is_active, u.created_at, u.last_login_at, u.site_id, s.name as site_name
     FROM users u LEFT JOIN sites s ON u.site_id = s.id WHERE u.id = ?`).get(req.params.id);
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json(user);

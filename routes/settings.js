@@ -1,11 +1,62 @@
 const express = require('express');
 const router = express.Router();
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+const path = require('path');
 const db = require('../database/db');
 const { authenticate, requireRole } = require('../middleware/authMiddleware');
 const { auditLog } = require('../middleware/auditMiddleware');
 
 router.use(authenticate, requireRole('admin'), auditLog);
+
+// System Settings
+router.get('/system', (req, res) => {
+  const rows = db.prepare('SELECT key, value FROM system_settings').all();
+  const settings = {};
+  rows.forEach(r => { settings[r.key] = r.value; });
+  res.json(settings);
+});
+
+router.put('/system', (req, res) => {
+  const { language, currency, date_format } = req.body;
+  const stmt = db.prepare('INSERT OR REPLACE INTO system_settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP)');
+  if (language) stmt.run('language', language);
+  if (currency) stmt.run('currency', currency);
+  if (date_format) stmt.run('date_format', date_format);
+  res.json({ message: 'Settings saved successfully' });
+});
+
+// Database Backup
+router.get('/backup', (req, res) => {
+  const dbPath = path.join(__dirname, '..', 'data', 'hospital.db');
+  if (!fs.existsSync(dbPath)) return res.status(404).json({ error: 'Database file not found' });
+  const date = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+  const filename = `hospital-backup-${date}.db`;
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  res.setHeader('Content-Type', 'application/octet-stream');
+  fs.createReadStream(dbPath).pipe(res);
+});
+
+// Database Restore (accepts JSON body with base64-encoded DB)
+router.post('/restore', (req, res) => {
+  const { data } = req.body;
+  if (!data) return res.status(400).json({ error: 'No backup data provided' });
+  try {
+    const buffer = Buffer.from(data, 'base64');
+    // Validate SQLite magic bytes
+    const magic = buffer.slice(0, 16).toString('ascii');
+    if (!magic.startsWith('SQLite format 3')) {
+      return res.status(400).json({ error: 'Invalid SQLite database file' });
+    }
+    const dbPath = path.join(__dirname, '..', 'data', 'hospital.db');
+    const tmpPath = dbPath + '.restore_tmp';
+    fs.writeFileSync(tmpPath, buffer);
+    fs.renameSync(tmpPath, dbPath);
+    res.json({ message: 'Database restored successfully. Please restart the server.' });
+  } catch (e) {
+    res.status(500).json({ error: 'Restore failed: ' + e.message });
+  }
+});
 
 // Sites
 router.get('/sites', (req, res) => { res.json(db.prepare('SELECT * FROM sites ORDER BY name').all()); });

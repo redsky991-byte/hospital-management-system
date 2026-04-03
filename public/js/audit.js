@@ -1,8 +1,11 @@
+window._activeNav = 'audit';
+
 document.addEventListener('DOMContentLoaded', async () => {
   const user = checkAuth();
   if (user.role !== 'admin') { window.location.href = '/dashboard.html'; return; }
   renderNav('audit');
   renderUserInfo();
+  setTimeout(syncTopbarSelectors, 50);
   await loadAuditLogs();
   document.getElementById('filter-btn')?.addEventListener('click', loadAuditLogs);
 });
@@ -29,6 +32,6 @@ async function loadAuditLogs() {
         <td>${l.module || '-'}</td>
         <td>${l.record_id || '-'}</td>
         <td>${l.ip_address || '-'}</td>
-      </tr>`).join('') || '<tr><td colspan="6" class="text-center text-muted">No audit logs found</td></tr>';
+      </tr>`).join('') || `<tr><td colspan="6" class="text-center text-muted">${t('no_data')}</td></tr>`;
   } catch (e) { console.error(e); }
 }

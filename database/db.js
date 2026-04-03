@@ -57,4 +57,20 @@ if (!wardExists) {
   }
 }
 
+// Seed default system settings
+const settingExists = db.prepare("SELECT key FROM system_settings WHERE key = 'language'").get();
+if (!settingExists) {
+  const insertSetting = db.prepare('INSERT OR IGNORE INTO system_settings (key, value) VALUES (?, ?)');
+  insertSetting.run('language', 'en');
+  insertSetting.run('currency', 'USD');
+  insertSetting.run('date_format', 'YYYY-MM-DD');
+}
+
+// Add last_login_at column if it doesn't exist (migration for existing DBs)
+try {
+  db.prepare('ALTER TABLE users ADD COLUMN last_login_at DATETIME').run();
+} catch (e) {
+  // Column already exists, ignore
+}
+
 module.exports = db;

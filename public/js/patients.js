@@ -1,10 +1,13 @@
 let currentPage = 1;
 let editingId = null;
 
+window._activeNav = 'patients';
+
 document.addEventListener('DOMContentLoaded', async () => {
   checkAuth();
   renderNav('patients');
   renderUserInfo();
+  setTimeout(syncTopbarSelectors, 50);
   await loadSitesAndWards();
   await loadPatients();
 
@@ -112,17 +115,17 @@ async function savePatient() {
     site_id: document.getElementById('patient-site').value,
     ward_id: document.getElementById('patient-ward').value
   };
-  if (!data.first_name || !data.last_name) { alert('First and last name are required'); return; }
+  if (!data.first_name || !data.last_name) { alert(t('first_name') + ' & ' + t('last_name') + ' ' + t('required_field')); return; }
   try {
     if (editingId) { await apiPut('/patients/' + editingId, data); }
     else { await apiPost('/patients', data); }
     bootstrap.Modal.getInstance(document.getElementById('patientModal')).hide();
     loadPatients();
-  } catch (e) { alert('Error saving patient: ' + e.message); }
+  } catch (e) { alert(t('error') + ': ' + e.message); }
 }
 
 async function deletePatient(id) {
-  if (!confirm('Are you sure you want to delete this patient?')) return;
+  if (!confirm(t('confirm_delete'))) return;
   try { await apiDelete('/patients/' + id); loadPatients(); }
-  catch (e) { alert('Error deleting patient: ' + e.message); }
+  catch (e) { alert(t('error') + ': ' + e.message); }
 }

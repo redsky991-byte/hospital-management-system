@@ -1,12 +1,12 @@
-const CACHE_NAME = 'medcare-hms-v1';
+const CACHE_NAME = 'medcare-hms-v2';
 const STATIC_ASSETS = [
   '/', '/index.html', '/dashboard.html', '/patients.html',
   '/appointments.html', '/billing.html', '/users.html',
   '/audit.html', '/settings.html', '/about.html',
   '/css/style.css',
-  '/js/api.js', '/js/auth.js', '/js/dashboard.js',
-  '/js/patients.js', '/js/appointments.js', '/js/billing.js',
-  '/js/users.js', '/js/audit.js', '/js/settings.js'
+  '/js/api.js', '/js/i18n.js', '/js/currency.js', '/js/auth.js',
+  '/js/dashboard.js', '/js/patients.js', '/js/appointments.js',
+  '/js/billing.js', '/js/users.js', '/js/audit.js', '/js/settings.js'
 ];
 
 self.addEventListener('install', (event) => {
