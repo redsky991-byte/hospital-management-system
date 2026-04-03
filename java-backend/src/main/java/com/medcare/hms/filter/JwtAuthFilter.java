@@ -1,5 +1,6 @@
 package com.medcare.hms.filter;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.medcare.hms.config.JwtUtil;
 import com.medcare.hms.model.AuthUser;
 import io.jsonwebtoken.Claims;
@@ -23,14 +24,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Autowired
     private JdbcTemplate jdbc;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     // Paths that do NOT require authentication
     private static final List<String> PUBLIC_PATHS = List.of("/api/auth/login");
 
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         String path = request.getRequestURI();
-        // Public API paths and all static resources
-        return PUBLIC_PATHS.stream().anyMatch(path::startsWith)
+        // Skip for public API paths and all non-API resources (static files)
+        return PUBLIC_PATHS.stream().anyMatch(path::equals)
                 || !path.startsWith("/api/");
     }
 
@@ -75,6 +78,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private void sendUnauthorized(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType("application/json");
-        response.getWriter().write("{\"error\":\"" + message + "\"}");
+        response.getWriter().write(objectMapper.writeValueAsString(Map.of("error", message)));
     }
 }

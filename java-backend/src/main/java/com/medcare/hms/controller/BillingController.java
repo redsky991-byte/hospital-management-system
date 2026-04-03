@@ -17,7 +17,7 @@ public class BillingController extends BaseController {
     @Autowired
     private JdbcTemplate jdbc;
 
-    private String generateInvoiceNumber() {
+    private synchronized String generateInvoiceNumber() {
         int year = Year.now().getValue();
         int count = jdbc.queryForObject("SELECT COUNT(*) FROM invoices", Integer.class);
         return String.format("INV-%d-%03d", year, count + 1);

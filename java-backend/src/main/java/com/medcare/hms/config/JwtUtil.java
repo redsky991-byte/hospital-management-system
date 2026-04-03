@@ -20,11 +20,13 @@ public class JwtUtil {
     private long expirationMs;
 
     private Key getKey() {
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        // Pad/truncate to 32 bytes for HMAC-SHA256
-        byte[] paddedKey = new byte[32];
-        System.arraycopy(keyBytes, 0, paddedKey, 0, Math.min(keyBytes.length, 32));
-        return Keys.hmacShaKeyFor(paddedKey);
+        try {
+            byte[] keyBytes = java.security.MessageDigest.getInstance("SHA-256")
+                    .digest(secret.getBytes(StandardCharsets.UTF_8));
+            return Keys.hmacShaKeyFor(keyBytes);
+        } catch (java.security.NoSuchAlgorithmException e) {
+            throw new IllegalStateException("SHA-256 not available", e);
+        }
     }
 
     public String generateToken(String id, String email, String role) {

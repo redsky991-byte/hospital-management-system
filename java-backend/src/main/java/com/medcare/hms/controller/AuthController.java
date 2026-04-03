@@ -8,7 +8,6 @@ import org.springframework.http.*;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.*;
 
 @RestController
@@ -21,7 +20,8 @@ public class AuthController extends BaseController {
     @Autowired
     private JwtUtil jwtUtil;
 
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
+    @Autowired
+    private BCryptPasswordEncoder encoder;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> body) {

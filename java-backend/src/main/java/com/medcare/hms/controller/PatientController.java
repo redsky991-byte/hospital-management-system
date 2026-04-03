@@ -17,7 +17,7 @@ public class PatientController extends BaseController {
     @Autowired
     private JdbcTemplate jdbc;
 
-    private String generatePatientNumber() {
+    private synchronized String generatePatientNumber() {
         int year = Year.now().getValue();
         int count = jdbc.queryForObject("SELECT COUNT(*) FROM patients", Integer.class);
         return String.format("PAT-%d-%03d", year, count + 1);

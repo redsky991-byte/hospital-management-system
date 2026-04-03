@@ -3,14 +3,14 @@ package com.medcare.hms.controller;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.*;
 import java.nio.file.*;
-import java.time.Instant;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @RestController
@@ -19,6 +19,16 @@ public class SettingsController extends BaseController {
 
     @Autowired
     private JdbcTemplate jdbc;
+
+    @Autowired
+    private ConfigurableApplicationContext appContext;
+
+    /**
+     * Resolved from spring.datasource.url (e.g. jdbc:sqlite:/path/to/hospital.db).
+     * Stored as a raw string so we can extract the filesystem path.
+     */
+    @Value("${spring.datasource.url}")
+    private String datasourceUrl;
 
     // ── System Settings ─────────────────────────────────────────────────────
 
@@ -64,8 +74,8 @@ public class SettingsController extends BaseController {
             response.getWriter().write("{\"error\":\"Database file not found\"}");
             return;
         }
-        String timestamp = DateTimeFormatter.ISO_INSTANT.format(Instant.now())
-                .replace(":", "-").replace(".", "-").substring(0, 19);
+        String timestamp = java.time.LocalDateTime.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd-HH-mm-ss"));
         String filename = "hospital-backup-" + timestamp + ".db";
         response.setHeader("Content-Disposition", "attachment; filename=\"" + filename + "\"");
         response.setContentType("application/octet-stream");
@@ -116,11 +126,13 @@ public class SettingsController extends BaseController {
             if (Files.exists(dbPath)) Files.delete(dbPath);
             Files.move(tmpPath, dbPath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Schedule JVM exit so a process manager restarts the service
+            // Gracefully close the Spring context (triggers DataSource close) then exit
+            // so a process manager (PM2, systemd) can restart the service with the new DB.
             new Thread(() -> {
                 try { Thread.sleep(200); } catch (InterruptedException ignored) {}
+                appContext.close();
                 System.exit(0);
-            }).start();
+            }, "restore-shutdown").start();
 
             return ResponseEntity.ok(Map.of("message",
                     "Database restored successfully. The server is restarting — please wait a moment, then reload the page. " +
@@ -251,9 +263,18 @@ public class SettingsController extends BaseController {
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
+    /**
+     * Derives the filesystem path to the SQLite database from the configured
+     * datasource URL (e.g. "jdbc:sqlite:/abs/path/hospital.db" or
+     * "jdbc:sqlite:relative/path/hospital.db").
+     */
     private Path resolveDbPath() {
-        // Default location mirrors Node.js: project_root/data/hospital.db
-        // user.dir in Spring Boot = the working directory (project root)
-        return Path.of(System.getProperty("user.dir"), "data", "hospital.db");
+        // datasourceUrl format: jdbc:sqlite:<path>
+        String filePath = datasourceUrl.replaceFirst("^jdbc:sqlite:", "");
+        Path p = Path.of(filePath);
+        if (!p.isAbsolute()) {
+            p = Path.of(System.getProperty("user.dir")).resolve(p).normalize();
+        }
+        return p;
     }
 }

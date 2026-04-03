@@ -16,7 +16,8 @@ public class UserController extends BaseController {
     @Autowired
     private JdbcTemplate jdbc;
 
-    private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
+    @Autowired
+    private BCryptPasswordEncoder encoder;
 
     @GetMapping
     public ResponseEntity<?> list(HttpServletRequest request) {

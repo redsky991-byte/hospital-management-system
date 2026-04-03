@@ -16,6 +16,9 @@ public class DatabaseInitializer {
     @Autowired
     private JdbcTemplate jdbc;
 
+    @Autowired
+    private BCryptPasswordEncoder encoder;
+
     @PostConstruct
     public void init() {
         createSchema();
@@ -169,8 +172,6 @@ public class DatabaseInitializer {
     }
 
     private void seedData() {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder(10);
-
         // Seed default site
         List<Map<String, Object>> sites = jdbc.queryForList(
                 "SELECT id FROM sites WHERE name = 'Main Hospital'");
