@@ -2,6 +2,16 @@ let billPage = 1;
 let billEditId = null;
 let lineItems = [];
 
+
+function escHtml(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   checkAuth();
   renderNav('billing');
@@ -120,12 +130,12 @@ async function viewInvoice(id) {
       <div class="row mb-3">
         <div class="col-6"><strong>${t('invoice_number')}:</strong> ${inv.invoice_number}</div>
         <div class="col-6"><strong>${t('status')}:</strong> <span class="badge bg-secondary">${t(inv.status) || inv.status}</span></div>
-        <div class="col-6"><strong>${t('patient')}:</strong> ${inv.patient_name}</div>
+        <div class="col-6"><strong>${t('patient')}:</strong> ${escHtml(inv.patient_name)}</div>
         <div class="col-6"><strong>${t('due_date')}:</strong> ${inv.due_date || 'N/A'}</div>
       </div>
       <table class="table table-sm">
         <thead><tr><th>${t('description')}</th><th>${t('quantity')}</th><th>${t('unit_price')}</th><th>${t('total')}</th></tr></thead>
-        <tbody>${(inv.items || []).map(i => `<tr><td>${i.description}</td><td>${i.quantity}</td><td>${formatCurrency(i.unit_price)}</td><td>${formatCurrency(i.total)}</td></tr>`).join('')}</tbody>
+        <tbody>${(inv.items || []).map(i => `<tr><td>${escHtml(i.description)}</td><td>${i.quantity}</td><td>${formatCurrency(i.unit_price)}</td><td>${formatCurrency(i.total)}</td></tr>`).join('')}</tbody>
       </table>
       <div class="text-end">
         <p>${t('discount')}: ${formatCurrency(inv.discount)}</p>
@@ -165,11 +175,11 @@ async function printInvoice(id) {
     <h3 class="text-center">MedCare Hospital Management System</h3>
     <h5 class="text-center mb-4">${t('billing')} / Invoice</h5>
     <div class="row mb-3">
-      <div class="col-6"><strong>${t('invoice_number')}:</strong> ${inv.invoice_number}<br><strong>${t('patient')}:</strong> ${inv.patient_name}<br><strong>${t('patient_number')}:</strong> ${inv.patient_number}</div>
+      <div class="col-6"><strong>${t('invoice_number')}:</strong> ${inv.invoice_number}<br><strong>${t('patient')}:</strong> ${escHtml(inv.patient_name)}<br><strong>${t('patient_number')}:</strong> ${escHtml(inv.patient_number)}</div>
       <div class="col-6 text-end"><strong>${t('date')}:</strong> ${inv.created_at}<br><strong>${t('due_date')}:</strong> ${inv.due_date || 'N/A'}<br><strong>${t('status')}:</strong> ${t(inv.status) || inv.status}<br><small class="text-muted">${t('currency')}: ${curr}</small></div>
     </div>
     <table class="table table-bordered"><thead class="table-dark"><tr><th>${t('description')}</th><th>${t('quantity')}</th><th>${t('unit_price')}</th><th>${t('total')}</th></tr></thead>
-    <tbody>${(inv.items || []).map(i => `<tr><td>${i.description}</td><td>${i.quantity}</td><td>${sym}${Number(i.unit_price).toFixed(2)}</td><td>${sym}${Number(i.total).toFixed(2)}</td></tr>`).join('')}</tbody></table>
+    <tbody>${(inv.items || []).map(i => `<tr><td>${escHtml(i.description)}</td><td>${i.quantity}</td><td>${sym}${Number(i.unit_price).toFixed(2)}</td><td>${sym}${Number(i.total).toFixed(2)}</td></tr>`).join('')}</tbody></table>
     <div class="row justify-content-end"><div class="col-4">
       <table class="table table-sm">
         <tr><td>${t('discount')}</td><td>${sym}${Number(inv.discount).toFixed(2)}</td></tr>

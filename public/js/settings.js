@@ -178,7 +178,14 @@ async function loadSites() {
   if (deptSiteSel) deptSiteSel.innerHTML = opt;
 }
 
-function escQ(s) { return String(s).replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+function escQ(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 function openAddSite() { siteEditId = null; document.getElementById('site-form').reset(); new bootstrap.Modal(document.getElementById('siteModal')).show(); }
 function editSite(id, name, address, phone) {
