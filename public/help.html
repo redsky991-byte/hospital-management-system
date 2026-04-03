@@ -132,6 +132,11 @@
           </button>
         </li>
         <li class="nav-item">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-deploy" type="button">
+            <i class="fas fa-cloud-upload-alt me-1"></i>Webspace / Domain Setup
+          </button>
+        </li>
+        <li class="nav-item">
           <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-faq" type="button">
             <i class="fas fa-comments me-1"></i>FAQ
           </button>
@@ -752,6 +757,302 @@
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- ===== WEBSPACE / DOMAIN SETUP ===== -->
+        <div class="tab-pane fade" id="tab-deploy">
+          <div class="row g-4">
+
+            <!-- Intro alert -->
+            <div class="col-12">
+              <div class="alert alert-primary mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                MedCare HMS is a <strong>Node.js application</strong>. It requires a server that can run Node.js — it cannot be uploaded as plain PHP/HTML files to a traditional shared host. Choose one of the methods below based on your hosting environment.
+              </div>
+            </div>
+
+            <!-- Method A – VPS / Cloud Server -->
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <strong><i class="fas fa-server me-2 text-primary"></i>Method A — VPS / Cloud Server (Recommended)</strong>
+                  <span class="badge bg-success ms-2">Most Reliable</span>
+                </div>
+                <div class="card-body">
+                  <p class="text-muted small mb-3">Works on any Linux VPS: DigitalOcean, Linode, AWS EC2, Azure VM, Google Cloud, Hostinger VPS, etc.</p>
+
+                  <div class="step-item">
+                    <div class="step-circle">1</div>
+                    <div class="step-body">
+                      <h6>Connect to Your Server via SSH</h6>
+                      <p>Open a terminal and connect: <code>ssh root@YOUR_SERVER_IP</code>. Replace <em>YOUR_SERVER_IP</em> with your server's public IP address.</p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">2</div>
+                    <div class="step-body">
+                      <h6>Install Node.js (v18 or later)</h6>
+                      <p>
+                        <code class="d-block p-2 bg-light rounded mt-1">curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -<br>sudo apt-get install -y nodejs</code>
+                        Verify: <code>node -v</code> and <code>npm -v</code>.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">3</div>
+                    <div class="step-body">
+                      <h6>Upload the Project Files</h6>
+                      <p>
+                        <strong>Option 1 – Git (fastest):</strong>
+                        <code class="d-block p-2 bg-light rounded mt-1">git clone https://github.com/redsky991-byte/hospital-management-system.git /var/www/medcare<br>cd /var/www/medcare</code>
+                        <strong>Option 2 – FTP/SFTP:</strong> Use FileZilla or WinSCP. Connect with SFTP (port 22), upload the entire project folder to <code>/var/www/medcare</code>.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">4</div>
+                    <div class="step-body">
+                      <h6>Install Dependencies</h6>
+                      <p><code>cd /var/www/medcare &amp;&amp; npm install --omit=dev</code></p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">5</div>
+                    <div class="step-body">
+                      <h6>Create the .env File</h6>
+                      <p>
+                        <code class="d-block p-2 bg-light rounded mt-1">cp .env.example .env<br>nano .env</code>
+                        Set <code>PORT=3000</code> and a strong random <code>JWT_SECRET</code>. Save and close (<kbd>Ctrl</kbd>+<kbd>X</kbd>, <kbd>Y</kbd>, <kbd>Enter</kbd>).
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">6</div>
+                    <div class="step-body">
+                      <h6>Keep the App Running with PM2</h6>
+                      <p>
+                        <code class="d-block p-2 bg-light rounded mt-1">npm install -g pm2<br>pm2 start server.js --name medcare-hms<br>pm2 save<br>pm2 startup</code>
+                        PM2 automatically restarts the app after a server reboot or crash.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">7</div>
+                    <div class="step-body">
+                      <h6>Open the Firewall Port</h6>
+                      <p>
+                        <code class="d-block p-2 bg-light rounded mt-1">sudo ufw allow 3000/tcp<br>sudo ufw allow OpenSSH<br>sudo ufw enable</code>
+                        Test by visiting <strong>http://YOUR_SERVER_IP:3000</strong> in your browser.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">8</div>
+                    <div class="step-body">
+                      <h6>Point Your Domain to the Server</h6>
+                      <p>Log in to your domain registrar (Namecheap, GoDaddy, Cloudflare, etc.) and add an <strong>A Record</strong>:
+                        <code class="d-block p-2 bg-light rounded mt-1">Type: A<br>Name: @  (or subdomain, e.g. hms)<br>Value: YOUR_SERVER_IP<br>TTL: Auto (or 300)</code>
+                        DNS changes can take up to 24 hours to propagate.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">9</div>
+                    <div class="step-body">
+                      <h6>Set Up Nginx Reverse Proxy (serve on port 80/443)</h6>
+                      <p>
+                        Install Nginx: <code>sudo apt install nginx -y</code><br>
+                        Create a site config:
+                        <code class="d-block p-2 bg-light rounded mt-1">sudo nano /etc/nginx/sites-available/medcare</code>
+                        Paste the following (replace <em>yourdomain.com</em>):
+                        <code class="d-block p-2 bg-light rounded mt-1">server {<br>&nbsp;&nbsp;listen 80;<br>&nbsp;&nbsp;server_name yourdomain.com www.yourdomain.com;<br><br>&nbsp;&nbsp;location / {<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_pass http://localhost:3000;<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_http_version 1.1;<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_set_header Upgrade $http_upgrade;<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_set_header Connection 'upgrade';<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_set_header Host $host;<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_cache_bypass $http_upgrade;<br>&nbsp;&nbsp;}<br>}</code>
+                        Enable and reload:
+                        <code class="d-block p-2 bg-light rounded mt-1">sudo ln -s /etc/nginx/sites-available/medcare /etc/nginx/sites-enabled/<br>sudo nginx -t<br>sudo systemctl reload nginx</code>
+                        Now visit <strong>http://yourdomain.com</strong> — no port number needed.<br>
+                        <strong>Security:</strong> Remove the direct port 3000 firewall rule so traffic must go through Nginx:
+                        <code class="d-block p-2 bg-light rounded mt-1">sudo ufw delete allow 3000/tcp<br>sudo ufw reload</code>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">10</div>
+                    <div class="step-body">
+                      <h6>Enable Free HTTPS (SSL) with Let's Encrypt</h6>
+                      <p>
+                        <code class="d-block p-2 bg-light rounded mt-1">sudo apt install certbot python3-certbot-nginx -y<br>sudo certbot --nginx -d yourdomain.com -d www.yourdomain.com</code>
+                        Follow the prompts. Certbot automatically updates your Nginx config for HTTPS and renews the certificate every 90 days.
+                      </p>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Method B – cPanel / Shared Hosting with Node.js -->
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <strong><i class="fas fa-globe me-2 text-success"></i>Method B — cPanel Shared Hosting with Node.js Support</strong>
+                  <span class="badge bg-info ms-2">For cPanel Hosts</span>
+                </div>
+                <div class="card-body">
+                  <div class="alert alert-warning py-2 mb-3">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Not all shared hosts support Node.js. Check with your host (e.g., Namecheap, Hostinger, A2 Hosting) that <strong>Node.js App Manager</strong> is available in cPanel.
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">1</div>
+                    <div class="step-body">
+                      <h6>Upload Files via File Manager or FTP</h6>
+                      <p>Zip your project folder (excluding <code>node_modules/</code> and <code>data/</code>), upload the zip to your hosting home directory using cPanel File Manager or an FTP client (FileZilla), then extract it.</p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">2</div>
+                    <div class="step-body">
+                      <h6>Open Node.js App Manager in cPanel</h6>
+                      <p>In cPanel, search for <strong>Setup Node.js App</strong>. Click <strong>Create Application</strong>.</p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">3</div>
+                    <div class="step-body">
+                      <h6>Configure the Application</h6>
+                      <p>
+                        Fill in the fields:<br>
+                        • <strong>Node.js version:</strong> 18 or 20<br>
+                        • <strong>Application mode:</strong> Production<br>
+                        • <strong>Application root:</strong> Path to your uploaded project folder (e.g., <code>medcare</code>)<br>
+                        • <strong>Application URL:</strong> Your domain or subdomain<br>
+                        • <strong>Application startup file:</strong> <code>server.js</code>
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">4</div>
+                    <div class="step-body">
+                      <h6>Set Environment Variables</h6>
+                      <p>In the same Node.js App Manager form, add environment variables: <code>PORT=3000</code> and a strong <code>JWT_SECRET</code> (use a random string of at least 32 characters — generate one with <code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code>). Save.</p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">5</div>
+                    <div class="step-body">
+                      <h6>Install Dependencies via SSH or App Manager</h6>
+                      <p>If SSH is available: <code>cd ~/medcare &amp;&amp; npm install --omit=dev</code>. Some cPanel Node.js managers have a button <strong>Run NPM Install</strong> — use that if no SSH access.</p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">6</div>
+                    <div class="step-body">
+                      <h6>Start the Application</h6>
+                      <p>Click <strong>Start App</strong> in cPanel Node.js Manager. Visit your domain — MedCare HMS should load.</p>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <!-- Method C – Docker -->
+            <div class="col-12">
+              <div class="card">
+                <div class="card-header">
+                  <strong><i class="fab fa-docker me-2 text-info"></i>Method C — Docker (Advanced)</strong>
+                </div>
+                <div class="card-body">
+                  <div class="step-item">
+                    <div class="step-circle">1</div>
+                    <div class="step-body">
+                      <h6>Create a Dockerfile in the Project Root</h6>
+                      <p>
+                        <code class="d-block p-2 bg-light rounded mt-1">FROM node:20-alpine<br>WORKDIR /app<br>COPY package*.json ./<br>RUN npm ci --omit=dev<br>COPY . .<br>EXPOSE 3000<br>CMD ["node", "server.js"]</code>
+                      </p>
+                    </div>
+                  </div>
+                  <div class="step-item">
+                    <div class="step-circle">2</div>
+                    <div class="step-body">
+                      <h6>Build and Run the Container</h6>
+                      <p>
+                        <code class="d-block p-2 bg-light rounded mt-1">docker build -t medcare-hms .<br>docker run -d -p 3000:3000 \<br>&nbsp;&nbsp;-e JWT_SECRET=your-secret \<br>&nbsp;&nbsp;-v $(pwd)/data:/app/data \<br>&nbsp;&nbsp;--name medcare-hms \<br>&nbsp;&nbsp;medcare-hms</code>
+                        Access at <strong>http://YOUR_SERVER_IP:3000</strong>. Combine with Nginx (Step 9 above) for a domain + HTTPS.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Quick Checklist -->
+            <div class="col-lg-6">
+              <div class="card">
+                <div class="card-header"><strong><i class="fas fa-check-double me-2 text-success"></i>Pre-Launch Checklist</strong></div>
+                <div class="card-body">
+                  <ul class="list-unstyled mb-0">
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Strong <code>JWT_SECRET</code> set in <code>.env</code></li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Default admin password changed</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>HTTPS enabled (Let's Encrypt or paid cert)</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>PM2 or process manager running</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Firewall configured (block direct port 3000 after Nginx)</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Regular backups of <code>data/hospital.db</code> scheduled (e.g., daily cron: <code>0 2 * * * cp /var/www/medcare/data/hospital.db /backups/hospital-$(date +\%F).db</code>)</li>
+                    <li><i class="fas fa-check-circle text-success me-2"></i>Hospital sites, wards, and departments added in Settings</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <!-- Common Deployment Issues -->
+            <div class="col-lg-6">
+              <div class="card">
+                <div class="card-header"><strong><i class="fas fa-bug me-2 text-danger"></i>Common Deployment Issues</strong></div>
+                <div class="card-body p-0">
+                  <table class="table table-sm mb-0">
+                    <thead><tr><th>Problem</th><th>Fix</th></tr></thead>
+                    <tbody>
+                      <tr>
+                        <td>Site shows "502 Bad Gateway"</td>
+                        <td>Node app is not running. Run <code>pm2 status</code> and restart: <code>pm2 restart medcare-hms</code></td>
+                      </tr>
+                      <tr>
+                        <td>HTTPS certificate error</td>
+                        <td>Make sure DNS is fully propagated before running Certbot. Check with <code>dig yourdomain.com</code></td>
+                      </tr>
+                      <tr>
+                        <td>Cannot write to database</td>
+                        <td>Ensure the <code>data/</code> folder exists and is writable: <code>chmod 755 data</code></td>
+                      </tr>
+                      <tr>
+                        <td>App crashes on start</td>
+                        <td>Check logs: <code>pm2 logs medcare-hms</code>. Most common cause: missing <code>.env</code> or wrong Node.js version</td>
+                      </tr>
+                      <tr>
+                        <td>Files uploaded but app won't start on cPanel</td>
+                        <td>Ensure <code>node_modules</code> was installed on the server, not uploaded from your local machine</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
