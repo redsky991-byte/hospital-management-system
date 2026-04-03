@@ -36,16 +36,22 @@ app.register_blueprint(settings_bp, url_prefix="/api/settings")
 @app.route("/<path:path>")
 def serve_frontend(path):
     public = Path(app.static_folder)
-    target = public / path
-    if path and target.exists():
-        return send_from_directory(str(public), path)
+    # Only serve files that actually exist inside the public folder; everything else → index.html
+    if path:
+        target = (public / path).resolve()
+        try:
+            target.relative_to(public.resolve())  # ensure no directory traversal
+        except ValueError:
+            return send_from_directory(str(public), "index.html")
+        if target.exists() and target.is_file():
+            return send_from_directory(str(public), path)
     return send_from_directory(str(public), "index.html")
 
 
 @app.errorhandler(Exception)
 def handle_error(err):
     app.logger.error(str(err))
-    return {"error": "Internal server error", "message": str(err)}, 500
+    return {"error": "Internal server error"}, 500
 
 
 if __name__ == "__main__":

@@ -117,16 +117,24 @@ def create_appointment():
 def update_appointment(aid):
     data = request.get_json() or {}
     conn = get_db()
-    if not conn.execute("SELECT id FROM appointments WHERE id = ?", (aid,)).fetchone():
+    existing = conn.execute("SELECT * FROM appointments WHERE id = ?", (aid,)).fetchone()
+    if not existing:
         conn.close()
         return jsonify({"error": "Appointment not found"}), 404
+    existing = dict(existing)
     conn.execute(
         """UPDATE appointments SET patient_id=?, doctor_id=?, department_id=?, site_id=?,
            appointment_date=?, appointment_time=?, status=?, notes=?, updated_at=CURRENT_TIMESTAMP WHERE id=?""",
         (
-            data.get("patient_id"), data.get("doctor_id"), data.get("department_id"),
-            data.get("site_id"), data.get("appointment_date"), data.get("appointment_time"),
-            data.get("status"), data.get("notes"), aid,
+            data.get("patient_id") or existing["patient_id"],
+            data.get("doctor_id") if "doctor_id" in data else existing["doctor_id"],
+            data.get("department_id") if "department_id" in data else existing["department_id"],
+            data.get("site_id") if "site_id" in data else existing["site_id"],
+            data.get("appointment_date") or existing["appointment_date"],
+            data.get("appointment_time") or existing["appointment_time"],
+            data.get("status") or existing["status"],
+            data.get("notes") if "notes" in data else existing["notes"],
+            aid,
         ),
     )
     conn.commit()

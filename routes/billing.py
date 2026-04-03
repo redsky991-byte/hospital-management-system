@@ -124,10 +124,10 @@ def update_invoice(iid):
 
     if items is not None:
         conn.execute("DELETE FROM invoice_items WHERE invoice_id = ?", (iid,))
-        d = float(discount) if discount is not None else 0.0
-        t = float(tax) if tax is not None else 0.0
+        discount_value = float(discount) if discount is not None else 0.0
+        tax_rate = float(tax) if tax is not None else 0.0
         subtotal = sum(float(item["quantity"]) * float(item["unit_price"]) for item in items)
-        total_amount = subtotal - d + (subtotal * t / 100)
+        total_amount = subtotal - discount_value + (subtotal * tax_rate / 100)
         for item in items:
             conn.execute(
                 "INSERT INTO invoice_items (id, invoice_id, description, quantity, unit_price, total) VALUES (?, ?, ?, ?, ?, ?)",

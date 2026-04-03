@@ -65,8 +65,8 @@ def backup_db():
             download_name=filename,
             mimetype="application/octet-stream",
         )
-    except Exception as e:
-        return jsonify({"error": f"Backup failed: {e}"}), 500
+    except Exception:
+        return jsonify({"error": "Backup failed. Please try again."}), 500
 
 
 @settings_bp.route("/restore", methods=["POST"])
@@ -109,9 +109,9 @@ def restore_db():
 
         import threading
         def _exit():
-            import time, sys
+            import time
             time.sleep(0.2)
-            os._exit(0)
+            os._exit(0)  # noqa: SLF001 — intentional hard exit for process manager restart
         threading.Thread(target=_exit, daemon=True).start()
 
         return jsonify({
@@ -121,9 +121,9 @@ def restore_db():
                 "(Requires a process manager such as PM2 or systemd to auto-restart.)"
             )
         })
-    except Exception as e:
+    except Exception:
         tmp_path.unlink(missing_ok=True)
-        return jsonify({"error": f"Restore failed: {e}"}), 500
+        return jsonify({"error": "Restore failed. Please try again."}), 500
 
 
 # ── Sites ─────────────────────────────────────────────────────────────────────
@@ -162,9 +162,19 @@ def create_site():
 def update_site(sid):
     data = request.get_json() or {}
     conn = get_db()
+    existing = conn.execute("SELECT * FROM sites WHERE id = ?", (sid,)).fetchone()
+    if not existing:
+        conn.close()
+        return jsonify({"error": "Site not found"}), 404
+    existing = dict(existing)
     conn.execute(
         "UPDATE sites SET name=?, address=?, phone=? WHERE id=?",
-        (data.get("name"), data.get("address"), data.get("phone"), sid),
+        (
+            data.get("name") or existing["name"],
+            data.get("address") if "address" in data else existing["address"],
+            data.get("phone") if "phone" in data else existing["phone"],
+            sid,
+        ),
     )
     conn.commit()
     conn.close()
@@ -225,9 +235,18 @@ def create_ward():
 def update_ward(wid):
     data = request.get_json() or {}
     conn = get_db()
+    existing = conn.execute("SELECT * FROM wards WHERE id = ?", (wid,)).fetchone()
+    if not existing:
+        conn.close()
+        return jsonify({"error": "Ward not found"}), 404
+    existing = dict(existing)
     conn.execute(
         "UPDATE wards SET name=?, site_id=? WHERE id=?",
-        (data.get("name"), data.get("site_id"), wid),
+        (
+            data.get("name") or existing["name"],
+            data.get("site_id") if "site_id" in data else existing["site_id"],
+            wid,
+        ),
     )
     conn.commit()
     conn.close()
@@ -288,9 +307,18 @@ def create_department():
 def update_department(did):
     data = request.get_json() or {}
     conn = get_db()
+    existing = conn.execute("SELECT * FROM departments WHERE id = ?", (did,)).fetchone()
+    if not existing:
+        conn.close()
+        return jsonify({"error": "Department not found"}), 404
+    existing = dict(existing)
     conn.execute(
         "UPDATE departments SET name=?, site_id=? WHERE id=?",
-        (data.get("name"), data.get("site_id"), did),
+        (
+            data.get("name") or existing["name"],
+            data.get("site_id") if "site_id" in data else existing["site_id"],
+            did,
+        ),
     )
     conn.commit()
     conn.close()

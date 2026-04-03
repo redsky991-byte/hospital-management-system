@@ -85,6 +85,14 @@ def update_profile():
     password = data.get("password")
 
     conn = get_db()
+    if email != g.user["email"]:
+        conflict = conn.execute(
+            "SELECT id FROM users WHERE email = ? AND id != ?", (email, g.user["id"])
+        ).fetchone()
+        if conflict:
+            conn.close()
+            return jsonify({"error": "Email already in use"}), 400
+
     if password:
         password_hash = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt(10)).decode("utf-8")
         conn.execute(

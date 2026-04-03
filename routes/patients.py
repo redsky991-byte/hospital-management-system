@@ -102,18 +102,28 @@ def create_patient():
 def update_patient(pid):
     data = request.get_json() or {}
     conn = get_db()
-    if not conn.execute("SELECT id FROM patients WHERE id = ?", (pid,)).fetchone():
+    existing = conn.execute("SELECT * FROM patients WHERE id = ?", (pid,)).fetchone()
+    if not existing:
         conn.close()
         return jsonify({"error": "Patient not found"}), 404
+    existing = dict(existing)
     conn.execute(
         """UPDATE patients SET first_name=?, last_name=?, date_of_birth=?, gender=?, phone=?,
            email=?, address=?, blood_group=?, allergies=?, site_id=?, ward_id=?,
            updated_at=CURRENT_TIMESTAMP WHERE id=?""",
         (
-            data.get("first_name"), data.get("last_name"), data.get("date_of_birth"),
-            data.get("gender"), data.get("phone"), data.get("email"), data.get("address"),
-            data.get("blood_group"), data.get("allergies"), data.get("site_id"),
-            data.get("ward_id"), pid,
+            data.get("first_name") or existing["first_name"],
+            data.get("last_name") or existing["last_name"],
+            data.get("date_of_birth") if "date_of_birth" in data else existing["date_of_birth"],
+            data.get("gender") if "gender" in data else existing["gender"],
+            data.get("phone") if "phone" in data else existing["phone"],
+            data.get("email") if "email" in data else existing["email"],
+            data.get("address") if "address" in data else existing["address"],
+            data.get("blood_group") if "blood_group" in data else existing["blood_group"],
+            data.get("allergies") if "allergies" in data else existing["allergies"],
+            data.get("site_id") if "site_id" in data else existing["site_id"],
+            data.get("ward_id") if "ward_id" in data else existing["ward_id"],
+            pid,
         ),
     )
     conn.commit()
