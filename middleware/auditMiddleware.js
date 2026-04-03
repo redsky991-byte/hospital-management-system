@@ -18,7 +18,7 @@ function auditLog(req, res, next) {
           module,
           recordId,
           JSON.stringify({ method: req.method, path: req.path, body: req.body }),
-          req.ip || req.connection.remoteAddress
+          req.ip || req.socket.remoteAddress
         );
       } catch (e) {
         // Audit log errors should not break the response

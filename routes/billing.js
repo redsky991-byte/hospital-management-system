@@ -16,16 +16,16 @@ function generateInvoiceNumber() {
 
 router.get('/', (req, res) => {
   const { status, patient_id, site_id, page = 1, limit = 20 } = req.query;
-  let query = `SELECT i.*, p.first_name || ' ' || p.last_name as patient_name, p.patient_number, s.name as site_name
-    FROM invoices i LEFT JOIN patients p ON i.patient_id = p.id LEFT JOIN sites s ON i.site_id = s.id WHERE 1=1`;
-  const params = [];
-  if (status) { query += ` AND i.status = ?`; params.push(status); }
-  if (patient_id) { query += ` AND i.patient_id = ?`; params.push(patient_id); }
-  if (site_id) { query += ` AND i.site_id = ?`; params.push(site_id); }
-  query += ` ORDER BY i.created_at DESC LIMIT ? OFFSET ?`;
-  params.push(parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
-  const invoices = db.prepare(query).all(...params);
-  const total = db.prepare('SELECT COUNT(*) as cnt FROM invoices').get().cnt;
+  let whereClause = `WHERE 1=1`;
+  const filterParams = [];
+  if (status) { whereClause += ` AND i.status = ?`; filterParams.push(status); }
+  if (patient_id) { whereClause += ` AND i.patient_id = ?`; filterParams.push(patient_id); }
+  if (site_id) { whereClause += ` AND i.site_id = ?`; filterParams.push(site_id); }
+  const query = `SELECT i.*, p.first_name || ' ' || p.last_name as patient_name, p.patient_number, s.name as site_name
+    FROM invoices i LEFT JOIN patients p ON i.patient_id = p.id LEFT JOIN sites s ON i.site_id = s.id ${whereClause}
+    ORDER BY i.created_at DESC LIMIT ? OFFSET ?`;
+  const invoices = db.prepare(query).all(...filterParams, parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
+  const total = db.prepare(`SELECT COUNT(*) as cnt FROM invoices i ${whereClause}`).get(...filterParams).cnt;
   res.json({ invoices, total });
 });
 

@@ -26,16 +26,15 @@ router.get('/today', (req, res) => {
 
 router.get('/', (req, res) => {
   const { date, doctor_id, status, site_id, page = 1, limit = 20 } = req.query;
-  let query = appointmentQuery + ` WHERE 1=1`;
-  const params = [];
-  if (date) { query += ` AND a.appointment_date = ?`; params.push(date); }
-  if (doctor_id) { query += ` AND a.doctor_id = ?`; params.push(doctor_id); }
-  if (status) { query += ` AND a.status = ?`; params.push(status); }
-  if (site_id) { query += ` AND a.site_id = ?`; params.push(site_id); }
-  query += ` ORDER BY a.appointment_date DESC, a.appointment_time DESC LIMIT ? OFFSET ?`;
-  params.push(parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
-  const appointments = db.prepare(query).all(...params);
-  const total = db.prepare('SELECT COUNT(*) as cnt FROM appointments').get().cnt;
+  let whereClause = ` WHERE 1=1`;
+  const filterParams = [];
+  if (date) { whereClause += ` AND a.appointment_date = ?`; filterParams.push(date); }
+  if (doctor_id) { whereClause += ` AND a.doctor_id = ?`; filterParams.push(doctor_id); }
+  if (status) { whereClause += ` AND a.status = ?`; filterParams.push(status); }
+  if (site_id) { whereClause += ` AND a.site_id = ?`; filterParams.push(site_id); }
+  const query = appointmentQuery + whereClause + ` ORDER BY a.appointment_date DESC, a.appointment_time DESC LIMIT ? OFFSET ?`;
+  const appointments = db.prepare(query).all(...filterParams, parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
+  const total = db.prepare(`SELECT COUNT(*) as cnt FROM appointments a${whereClause}`).get(...filterParams).cnt;
   res.json({ appointments, total });
 });
 
@@ -56,6 +55,8 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
   const { patient_id, doctor_id, department_id, site_id, appointment_date, appointment_time, status, notes } = req.body;
+  const existing = db.prepare('SELECT id FROM appointments WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'Appointment not found' });
   db.prepare(`UPDATE appointments SET patient_id=?, doctor_id=?, department_id=?, site_id=?, appointment_date=?, appointment_time=?, status=?, notes=?, updated_at=CURRENT_TIMESTAMP WHERE id=?`)
     .run(patient_id, doctor_id, department_id, site_id, appointment_date, appointment_time, status, notes, req.params.id);
   res.json({ message: 'Appointment updated successfully' });

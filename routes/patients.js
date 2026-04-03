@@ -16,22 +16,21 @@ function generatePatientNumber() {
 
 router.get('/', (req, res) => {
   const { search, site_id, page = 1, limit = 20 } = req.query;
-  let query = `SELECT p.*, s.name as site_name, w.name as ward_name
+  let whereClause = `WHERE 1=1`;
+  const filterParams = [];
+  if (search) {
+    whereClause += ` AND (p.first_name LIKE ? OR p.last_name LIKE ? OR p.patient_number LIKE ? OR p.phone LIKE ?)`;
+    const s = `%${search}%`;
+    filterParams.push(s, s, s, s);
+  }
+  if (site_id) { whereClause += ` AND p.site_id = ?`; filterParams.push(site_id); }
+  const query = `SELECT p.*, s.name as site_name, w.name as ward_name
     FROM patients p
     LEFT JOIN sites s ON p.site_id = s.id
     LEFT JOIN wards w ON p.ward_id = w.id
-    WHERE 1=1`;
-  const params = [];
-  if (search) {
-    query += ` AND (p.first_name LIKE ? OR p.last_name LIKE ? OR p.patient_number LIKE ? OR p.phone LIKE ?)`;
-    const s = `%${search}%`;
-    params.push(s, s, s, s);
-  }
-  if (site_id) { query += ` AND p.site_id = ?`; params.push(site_id); }
-  query += ` ORDER BY p.created_at DESC LIMIT ? OFFSET ?`;
-  params.push(parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
-  const patients = db.prepare(query).all(...params);
-  const total = db.prepare('SELECT COUNT(*) as cnt FROM patients').get().cnt;
+    ${whereClause} ORDER BY p.created_at DESC LIMIT ? OFFSET ?`;
+  const patients = db.prepare(query).all(...filterParams, parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
+  const total = db.prepare(`SELECT COUNT(*) as cnt FROM patients p ${whereClause}`).get(...filterParams).cnt;
   res.json({ patients, total, page: parseInt(page), limit: parseInt(limit) });
 });
 
@@ -55,6 +54,8 @@ router.post('/', (req, res) => {
 
 router.put('/:id', (req, res) => {
   const { first_name, last_name, date_of_birth, gender, phone, email, address, blood_group, allergies, site_id, ward_id } = req.body;
+  const existing = db.prepare('SELECT id FROM patients WHERE id = ?').get(req.params.id);
+  if (!existing) return res.status(404).json({ error: 'Patient not found' });
   db.prepare(`UPDATE patients SET first_name=?, last_name=?, date_of_birth=?, gender=?, phone=?, email=?, address=?, blood_group=?, allergies=?, site_id=?, ward_id=?, updated_at=CURRENT_TIMESTAMP WHERE id=?`)
     .run(first_name, last_name, date_of_birth, gender, phone, email, address, blood_group, allergies, site_id, ward_id, req.params.id);
   res.json({ message: 'Patient updated successfully' });
