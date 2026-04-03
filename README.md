@@ -445,7 +445,7 @@ After=network.target
 [Service]
 User=medcare
 WorkingDirectory=/opt/medcare
-ExecStart=/usr/bin/java -jar /opt/medcare/hospital-management-system-1.1.0.jar
+ExecStart=/usr/bin/java -jar /opt/medcare/java-backend/target/hospital-management-system-1.1.0.jar
 Environment=JWT_SECRET=your-strong-secret-here
 Restart=on-failure
 
