@@ -8,8 +8,9 @@ const db = require('../database/db');
 const { authenticate, requireRole } = require('../middleware/authMiddleware');
 const { auditLog } = require('../middleware/auditMiddleware');
 
-// All settings routes require authentication at minimum
+// All settings routes require authentication at minimum; all are audit-logged
 router.use(authenticate);
+router.use(auditLog);
 
 // Read-only routes accessible to ALL authenticated users (needed by appointments, patients pages)
 router.get('/sites', (req, res) => { res.json(db.prepare('SELECT * FROM sites ORDER BY name').all()); });
@@ -34,7 +35,6 @@ router.get('/departments', (req, res) => {
 
 // Everything below requires admin role
 router.use(requireRole('admin'));
-router.use(auditLog);
 
 // System Settings
 router.get('/system', (req, res) => {
