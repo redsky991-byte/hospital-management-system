@@ -9,28 +9,22 @@
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-  <!-- Sidebar -->
   <nav class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-icon"><i class="fas fa-hospital"></i></div>
       <div>
         <div class="brand-text">MedCare</div>
-        <div class="brand-sub">Hospital Management</div>
+        <div class="brand-sub" data-i18n="hospital_management">Hospital Management</div>
       </div>
     </div>
-    <div class="sidebar-nav-wrapper">
-      <ul id="sidebar-nav"></ul>
-    </div>
-    <div class="sidebar-footer">
-      <i class="fas fa-code me-1"></i> Developed by Zulfiqar Ali
-    </div>
+    <div class="sidebar-nav-wrapper"><ul id="sidebar-nav"></ul></div>
+    <div class="sidebar-footer"><i class="fas fa-code me-1"></i> Developed by Zulfiqar Ali</div>
   </nav>
 
-  <!-- Main Content -->
   <div class="main-content">
     <header class="topbar">
       <div class="topbar-left">
-        <h5 class="page-title"><i class="fas fa-cog me-2 text-primary"></i>Settings</h5>
+        <h5 class="page-title"><i class="fas fa-cog me-2 text-primary"></i><span data-i18n="settings">Settings</span></h5>
       </div>
       <div class="topbar-right">
         <span class="site-badge"><i class="fas fa-hospital-alt me-1"></i><span id="site-name"></span></span>
@@ -42,7 +36,7 @@
           </div>
         </div>
         <button class="btn btn-sm btn-outline-danger" onclick="logout()">
-          <i class="fas fa-sign-out-alt me-1"></i>Logout
+          <i class="fas fa-sign-out-alt me-1"></i><span data-i18n="logout">Logout</span>
         </button>
       </div>
     </header>
@@ -53,34 +47,45 @@
           <ul class="nav nav-tabs card-header-tabs" id="settingsTabs" role="tablist">
             <li class="nav-item">
               <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#sites-tab" type="button">
-                <i class="fas fa-building me-1"></i>Sites
+                <i class="fas fa-building me-1"></i><span data-i18n="sites">Sites</span>
               </button>
             </li>
             <li class="nav-item">
               <button class="nav-link" data-bs-toggle="tab" data-bs-target="#wards-tab" type="button">
-                <i class="fas fa-bed me-1"></i>Wards
+                <i class="fas fa-bed me-1"></i><span data-i18n="wards">Wards</span>
               </button>
             </li>
             <li class="nav-item">
               <button class="nav-link" data-bs-toggle="tab" data-bs-target="#depts-tab" type="button">
-                <i class="fas fa-stethoscope me-1"></i>Departments
+                <i class="fas fa-stethoscope me-1"></i><span data-i18n="departments">Departments</span>
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#lang-tab" type="button">
+                <i class="fas fa-globe me-1"></i><span data-i18n="language_region">Language &amp; Region</span>
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-link" data-bs-toggle="tab" data-bs-target="#backup-tab" type="button">
+                <i class="fas fa-database me-1"></i><span data-i18n="backup_restore">Backup &amp; Restore</span>
               </button>
             </li>
           </ul>
         </div>
         <div class="card-body">
           <div class="tab-content">
+
             <!-- Sites Tab -->
             <div class="tab-pane fade show active" id="sites-tab">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0">Hospital Sites</h6>
+                <h6 class="mb-0" data-i18n="sites">Hospital Sites</h6>
                 <button class="btn btn-sm btn-primary" onclick="openAddSite()">
-                  <i class="fas fa-plus me-1"></i>Add Site
+                  <i class="fas fa-plus me-1"></i><span data-i18n="add">Add</span>
                 </button>
               </div>
               <div class="table-responsive">
                 <table class="table table-sm">
-                  <thead><tr><th>Name</th><th>Address</th><th>Phone</th><th>Actions</th></tr></thead>
+                  <thead><tr><th data-i18n="site_name">Name</th><th data-i18n="site_address">Address</th><th data-i18n="site_phone">Phone</th><th data-i18n="actions">Actions</th></tr></thead>
                   <tbody id="sites-tbody"></tbody>
                 </table>
               </div>
@@ -89,14 +94,14 @@
             <!-- Wards Tab -->
             <div class="tab-pane fade" id="wards-tab">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0">Hospital Wards</h6>
+                <h6 class="mb-0" data-i18n="wards">Hospital Wards</h6>
                 <button class="btn btn-sm btn-primary" onclick="openAddWard()">
-                  <i class="fas fa-plus me-1"></i>Add Ward
+                  <i class="fas fa-plus me-1"></i><span data-i18n="add">Add</span>
                 </button>
               </div>
               <div class="table-responsive">
                 <table class="table table-sm">
-                  <thead><tr><th>Name</th><th>Site</th><th>Actions</th></tr></thead>
+                  <thead><tr><th data-i18n="ward">Ward Name</th><th data-i18n="site">Site</th><th data-i18n="actions">Actions</th></tr></thead>
                   <tbody id="wards-tbody"></tbody>
                 </table>
               </div>
@@ -105,18 +110,109 @@
             <!-- Departments Tab -->
             <div class="tab-pane fade" id="depts-tab">
               <div class="d-flex justify-content-between align-items-center mb-3">
-                <h6 class="mb-0">Departments</h6>
+                <h6 class="mb-0" data-i18n="departments">Departments</h6>
                 <button class="btn btn-sm btn-primary" onclick="openAddDept()">
-                  <i class="fas fa-plus me-1"></i>Add Department
+                  <i class="fas fa-plus me-1"></i><span data-i18n="add">Add</span>
                 </button>
               </div>
               <div class="table-responsive">
                 <table class="table table-sm">
-                  <thead><tr><th>Name</th><th>Site</th><th>Actions</th></tr></thead>
+                  <thead><tr><th data-i18n="department">Department Name</th><th data-i18n="site">Site</th><th data-i18n="actions">Actions</th></tr></thead>
                   <tbody id="depts-tbody"></tbody>
                 </table>
               </div>
             </div>
+
+            <!-- Language & Region Tab -->
+            <div class="tab-pane fade" id="lang-tab">
+              <div class="row g-4 mt-1">
+                <div class="col-md-6">
+                  <div class="card border">
+                    <div class="card-body">
+                      <h6 class="mb-3"><i class="fas fa-language me-2 text-primary"></i><span data-i18n="language_region">Language & Region</span></h6>
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold" data-i18n="language">Language</label>
+                        <select class="form-select" id="sys-language"></select>
+                        <div class="form-text">Interface language for all users</div>
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label fw-semibold" data-i18n="currency">Currency</label>
+                        <select class="form-select" id="sys-currency"></select>
+                        <div class="form-text">Default currency for invoices and billing</div>
+                      </div>
+                      <button class="btn btn-primary" onclick="saveLanguageSettings()">
+                        <i class="fas fa-save me-2"></i><span data-i18n="save">Save</span>
+                      </button>
+                      <div id="lang-save-msg" class="mt-2 d-none alert alert-success py-2" data-i18n="success">Saved!</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="card border">
+                    <div class="card-body">
+                      <h6 class="mb-3"><i class="fas fa-info-circle me-2 text-primary"></i><span data-i18n="system_info">System Info</span></h6>
+                      <table class="table table-sm table-borderless mb-0">
+                        <tbody>
+                          <tr><td class="text-muted fw-semibold">Version</td><td>1.1.0</td></tr>
+                          <tr><td class="text-muted fw-semibold">Database</td><td>SQLite (WAL)</td></tr>
+                          <tr><td class="text-muted fw-semibold">Runtime</td><td>Node.js + Express</td></tr>
+                          <tr><td class="text-muted fw-semibold">Languages</td><td>EN, DE, FR, NL, UR, HI, AR, ZH, JA</td></tr>
+                          <tr><td class="text-muted fw-semibold">Currencies</td><td>USD, EUR, GBP, AED, PKR, INR, CNY, JPY + more</td></tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Backup & Restore Tab -->
+            <div class="tab-pane fade" id="backup-tab">
+              <div class="row g-4 mt-1">
+                <!-- Backup -->
+                <div class="col-md-6">
+                  <div class="card border">
+                    <div class="card-body">
+                      <h6 class="mb-3"><i class="fas fa-download me-2 text-success"></i><span data-i18n="backup_database">Backup Database</span></h6>
+                      <p class="text-muted small">Download the full SQLite database file. Store it safely for restoration.</p>
+                      <div class="backup-info-box mb-3">
+                        <div class="d-flex justify-content-between">
+                          <span class="text-muted" data-i18n="last_backup">Last Backup</span>
+                          <span id="last-backup-time">—</span>
+                        </div>
+                      </div>
+                      <button class="btn btn-success w-100" onclick="downloadBackup()">
+                        <i class="fas fa-download me-2"></i><span data-i18n="download_backup">Download Backup</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Restore -->
+                <div class="col-md-6">
+                  <div class="card border border-warning">
+                    <div class="card-body">
+                      <h6 class="mb-3"><i class="fas fa-upload me-2 text-warning"></i><span data-i18n="restore_database">Restore Database</span></h6>
+                      <div class="alert alert-warning py-2 small">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        <span data-i18n="restore_warning">Warning: Restoring will replace ALL current data!</span>
+                      </div>
+                      <div class="restore-drop-zone mb-3" id="restore-drop-zone" onclick="document.getElementById('restore-file').click()">
+                        <i class="fas fa-file-upload fa-2x text-muted mb-2"></i>
+                        <div class="text-muted small" data-i18n="choose_file">Choose Backup File (.db)</div>
+                        <input type="file" id="restore-file" accept=".db" class="d-none" onchange="handleRestoreFile(this)">
+                      </div>
+                      <div id="restore-file-name" class="text-muted small mb-2 d-none"></div>
+                      <button class="btn btn-warning w-100" id="restore-btn" onclick="restoreDatabase()" disabled>
+                        <i class="fas fa-upload me-2"></i><span data-i18n="restore_database">Restore Database</span>
+                      </button>
+                      <div id="restore-msg" class="mt-2 d-none alert py-2 small"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>
@@ -128,29 +224,29 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title"><i class="fas fa-building me-2"></i>Site</h5>
+          <h5 class="modal-title"><i class="fas fa-building me-2"></i><span data-i18n="site_name">Site</span></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <form id="site-form">
             <div class="mb-3">
-              <label class="form-label">Site Name <span class="text-danger">*</span></label>
-              <input type="text" class="form-control" id="site-name" required>
+              <label class="form-label" data-i18n="site_name">Site Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="site-name-input" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Address</label>
+              <label class="form-label" data-i18n="site_address">Address</label>
               <input type="text" class="form-control" id="site-address">
             </div>
             <div class="mb-3">
-              <label class="form-label">Phone</label>
+              <label class="form-label" data-i18n="site_phone">Phone</label>
               <input type="text" class="form-control" id="site-phone">
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
           <button type="button" class="btn btn-primary" id="save-site-btn">
-            <i class="fas fa-save me-1"></i>Save
+            <i class="fas fa-save me-1"></i><span data-i18n="save">Save</span>
           </button>
         </div>
       </div>
@@ -162,27 +258,25 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title"><i class="fas fa-bed me-2"></i>Ward</h5>
+          <h5 class="modal-title"><i class="fas fa-bed me-2"></i><span data-i18n="ward">Ward</span></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <form id="ward-form">
             <div class="mb-3">
-              <label class="form-label">Ward Name <span class="text-danger">*</span></label>
+              <label class="form-label" data-i18n="ward">Ward Name <span class="text-danger">*</span></label>
               <input type="text" class="form-control" id="ward-name" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Site</label>
-              <select class="form-select" id="ward-site">
-                <option value="">Select Site</option>
-              </select>
+              <label class="form-label" data-i18n="site">Site</label>
+              <select class="form-select" id="ward-site"><option value="">-- Select Site --</option></select>
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
           <button type="button" class="btn btn-primary" id="save-ward-btn">
-            <i class="fas fa-save me-1"></i>Save
+            <i class="fas fa-save me-1"></i><span data-i18n="save">Save</span>
           </button>
         </div>
       </div>
@@ -194,27 +288,25 @@
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title"><i class="fas fa-stethoscope me-2"></i>Department</h5>
+          <h5 class="modal-title"><i class="fas fa-stethoscope me-2"></i><span data-i18n="department">Department</span></h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <form id="dept-form">
             <div class="mb-3">
-              <label class="form-label">Department Name <span class="text-danger">*</span></label>
+              <label class="form-label" data-i18n="department">Department Name <span class="text-danger">*</span></label>
               <input type="text" class="form-control" id="dept-name" required>
             </div>
             <div class="mb-3">
-              <label class="form-label">Site</label>
-              <select class="form-select" id="dept-site">
-                <option value="">Select Site</option>
-              </select>
+              <label class="form-label" data-i18n="site">Site</label>
+              <select class="form-select" id="dept-site"><option value="">-- Select Site --</option></select>
             </div>
           </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-i18n="cancel">Cancel</button>
           <button type="button" class="btn btn-primary" id="save-dept-btn">
-            <i class="fas fa-save me-1"></i>Save
+            <i class="fas fa-save me-1"></i><span data-i18n="save">Save</span>
           </button>
         </div>
       </div>
@@ -224,6 +316,8 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="/js/api.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/currency.js"></script>
   <script src="/js/auth.js"></script>
   <script src="/js/settings.js"></script>
   <script src="/js/shortcuts.js"></script>

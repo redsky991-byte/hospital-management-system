@@ -1,10 +1,13 @@
 let apptPage = 1;
 let apptEditId = null;
 
+window._activeNav = 'appointments';
+
 document.addEventListener('DOMContentLoaded', async () => {
   checkAuth();
   renderNav('appointments');
   renderUserInfo();
+  setTimeout(syncTopbarSelectors, 50);
   await loadAppointmentOptions();
   await loadAppointments();
 
@@ -95,19 +98,19 @@ async function saveAppointment() {
     status: document.getElementById('appt-status').value,
     notes: document.getElementById('appt-notes').value
   };
-  if (!data.patient_id || !data.appointment_date || !data.appointment_time) { alert('Patient, date and time are required'); return; }
+  if (!data.patient_id || !data.appointment_date || !data.appointment_time) { alert(t('patient') + ', ' + t('date') + ' & ' + t('time') + ' ' + t('required_field')); return; }
   try {
     if (apptEditId) { await apiPut('/appointments/' + apptEditId, data); }
     else { await apiPost('/appointments', data); }
     bootstrap.Modal.getInstance(document.getElementById('apptModal')).hide();
     loadAppointments();
-  } catch (e) { alert('Error saving appointment: ' + e.message); }
+  } catch (e) { alert(t('error') + ': ' + e.message); }
 }
 
 async function deleteAppointment(id) {
-  if (!confirm('Delete this appointment?')) return;
+  if (!confirm(t('confirm_delete'))) return;
   try { await apiDelete('/appointments/' + id); loadAppointments(); }
-  catch (e) { alert('Error: ' + e.message); }
+  catch (e) { alert(t('error') + ': ' + e.message); }
 }
 
 async function printAppointment(id) {
