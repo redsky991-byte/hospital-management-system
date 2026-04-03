@@ -63,7 +63,29 @@ async function loadInvoices() {
           <button class="btn btn-sm btn-outline-danger" onclick="deleteInvoice('${i.id}')"><i class="fas fa-trash"></i></button>
         </td>
       </tr>`).join('') || `<tr><td colspan="8" class="text-center text-muted">${t('no_data')}</td></tr>`;
+    renderPagination(data.total, data.limit || 15, data.page || billPage, 'invoices-pagination', (p) => { billPage = p; loadInvoices(); });
   } catch (e) { console.error(e); }
+}
+
+function renderPagination(total, limit, page, elId, cb) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  const pages = Math.ceil(total / limit);
+  if (pages <= 1) { el.innerHTML = ''; return; }
+  const prevDis = page === 1 ? ' disabled' : '';
+  const nextDis = page === pages ? ' disabled' : '';
+  el.innerHTML = `<li class="page-item${prevDis}"><a class="page-link" href="#" data-page="${page - 1}">«</a></li>` +
+    Array.from({ length: pages }, (_, i) =>
+      `<li class="page-item${i + 1 === page ? ' active' : ''}"><a class="page-link" href="#" data-page="${i + 1}">${i + 1}</a></li>`
+    ).join('') +
+    `<li class="page-item${nextDis}"><a class="page-link" href="#" data-page="${page + 1}">»</a></li>`;
+  el.querySelectorAll('a.page-link').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const p = parseInt(a.dataset.page);
+      if (p >= 1 && p <= pages) cb(p);
+    });
+  });
 }
 
 function openNewInvoice() {

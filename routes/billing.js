@@ -26,7 +26,7 @@ router.get('/', (req, res) => {
     ORDER BY i.created_at DESC LIMIT ? OFFSET ?`;
   const invoices = db.prepare(query).all(...filterParams, parseInt(limit), (parseInt(page) - 1) * parseInt(limit));
   const total = db.prepare(`SELECT COUNT(*) as cnt FROM invoices i ${whereClause}`).get(...filterParams).cnt;
-  res.json({ invoices, total });
+  res.json({ invoices, total, page: parseInt(page), limit: parseInt(limit) });
 });
 
 router.get('/:id', (req, res) => {
