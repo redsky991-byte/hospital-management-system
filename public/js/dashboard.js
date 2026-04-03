@@ -8,6 +8,15 @@ const WIDGET_DEFS = [
   { id: 'w-quick',      label: 'widget_quick_actions',   default: true }
 ];
 
+function escHtml(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function getWidgetPrefs() {
   try { return JSON.parse(localStorage.getItem('hms_dashboard_widgets') || 'null') || null; } catch { return null; }
 }
@@ -110,11 +119,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (tbody && Array.isArray(appointments)) {
       tbody.innerHTML = appointments.slice(0, 10).map(a => `
         <tr>
-          <td>${a.patient_name || 'N/A'}</td>
-          <td>${a.doctor_name || 'N/A'}</td>
-          <td>${a.department_name || 'N/A'}</td>
-          <td>${a.appointment_time}</td>
-          <td><span class="badge bg-${a.status==='scheduled'?'primary':a.status==='completed'?'success':'danger'}">${t(a.status) || a.status}</span></td>
+          <td>${escHtml(a.patient_name || 'N/A')}</td>
+          <td>${escHtml(a.doctor_name || 'N/A')}</td>
+          <td>${escHtml(a.department_name || 'N/A')}</td>
+          <td>${escHtml(a.appointment_time)}</td>
+          <td><span class="badge bg-${a.status==='scheduled'?'primary':a.status==='completed'?'success':'danger'}">${t(a.status) || escHtml(a.status)}</span></td>
         </tr>`).join('') || `<tr><td colspan="5" class="text-center text-muted">${t('no_appointments')}</td></tr>`;
     }
 

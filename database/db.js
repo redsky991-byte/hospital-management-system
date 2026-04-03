@@ -57,14 +57,11 @@ if (!wardExists) {
   }
 }
 
-// Seed default system settings
-const settingExists = db.prepare("SELECT key FROM system_settings WHERE key = 'language'").get();
-if (!settingExists) {
-  const insertSetting = db.prepare('INSERT OR IGNORE INTO system_settings (key, value) VALUES (?, ?)');
-  insertSetting.run('language', 'en');
-  insertSetting.run('currency', 'USD');
-  insertSetting.run('date_format', 'YYYY-MM-DD');
-}
+// Seed default system settings (INSERT OR IGNORE ensures all keys exist in partial-migration DBs)
+const insertSetting = db.prepare('INSERT OR IGNORE INTO system_settings (key, value) VALUES (?, ?)');
+insertSetting.run('language', 'en');
+insertSetting.run('currency', 'USD');
+insertSetting.run('date_format', 'YYYY-MM-DD');
 
 // Add last_login_at column if it doesn't exist (migration for existing DBs)
 try {

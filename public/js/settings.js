@@ -2,6 +2,16 @@ window._activeNav = 'settings';
 let siteEditId = null, wardEditId = null, deptEditId = null;
 let restoreFileData = null;
 
+// HTML entity encoder — safe for content AND attribute values
+function escHtml(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const user = checkAuth();
   if (user.role !== 'admin') { window.location.href = '/dashboard.html'; return; }
@@ -30,26 +40,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ====== LANGUAGE / CURRENCY TAB ======
 async function initLanguageTab() {
-  // Build language select
   const langSel = document.getElementById('sys-language');
   if (langSel && typeof LANGUAGE_NAMES !== 'undefined') {
     langSel.innerHTML = Object.entries(LANGUAGE_NAMES).map(([code, name]) =>
-      `<option value="${code}">${name}</option>`
+      `<option value="${escHtml(code)}">${escHtml(name)}</option>`
     ).join('');
   }
-  // Build currency select
   const currSel = document.getElementById('sys-currency');
   if (currSel && typeof CURRENCIES !== 'undefined') {
     currSel.innerHTML = Object.values(CURRENCIES).map(c =>
-      `<option value="${c.code}">${c.code} – ${c.symbol} ${c.name}</option>`
+      `<option value="${escHtml(c.code)}">${escHtml(c.code)} – ${escHtml(c.symbol)} ${escHtml(c.name)}</option>`
     ).join('');
   }
-  // Load saved settings from server
   try {
     const sys = await apiGet('/settings/system');
     if (langSel && sys.language) langSel.value = sys.language;
     if (currSel && sys.currency) currSel.value = sys.currency;
-    // Also sync local storage
     if (sys.language && typeof setLang === 'function') {
       localStorage.setItem('hms_language', sys.language);
       setLang(sys.language);
@@ -58,7 +64,6 @@ async function initLanguageTab() {
       setCurrency(sys.currency);
     }
   } catch (e) {
-    // Fallback to localStorage
     if (langSel && typeof getLang === 'function') langSel.value = getLang();
     if (currSel && typeof getCurrency === 'function') currSel.value = getCurrency();
   }
@@ -163,28 +168,32 @@ async function restoreDatabase() {
 async function loadSites() {
   const sites = await apiGet('/settings/sites');
   const tbody = document.getElementById('sites-tbody');
-  if (tbody) tbody.innerHTML = sites.map(s => `
-    <tr>
-      <td>${s.name}</td><td>${s.address || '-'}</td><td>${s.phone || '-'}</td>
-      <td>
-        <button class="btn btn-sm btn-outline-warning me-1" onclick="editSite('${s.id}','${escQ(s.name)}','${escQ(s.address||'')}','${escQ(s.phone||'')}')"><i class="fas fa-edit"></i></button>
-        <button class="btn btn-sm btn-outline-danger" onclick="deleteSite('${s.id}')"><i class="fas fa-trash"></i></button>
-      </td>
-    </tr>`).join('') || `<tr><td colspan="4" class="text-center text-muted">${t('no_data')}</td></tr>`;
+  if (tbody) {
+    // Use data-* attributes instead of inline onclick to avoid HTML-entity decode XSS
+    tbody.innerHTML = sites.map(s => `
+      <tr>
+        <td>${escHtml(s.name)}</td>
+        <td>${escHtml(s.address || '-')}</td>
+        <td>${escHtml(s.phone || '-')}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-warning me-1 js-edit-site" data-id="${escHtml(s.id)}"><i class="fas fa-edit"></i></button>
+          <button class="btn btn-sm btn-outline-danger js-delete-site" data-id="${escHtml(s.id)}"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`).join('') || `<tr><td colspan="4" class="text-center text-muted">${t('no_data')}</td></tr>`;
+
+    tbody.querySelectorAll('.js-edit-site').forEach(btn => {
+      const site = sites.find(s => s.id === btn.dataset.id);
+      if (site) btn.addEventListener('click', () => editSite(site.id, site.name, site.address || '', site.phone || ''));
+    });
+    tbody.querySelectorAll('.js-delete-site').forEach(btn => {
+      btn.addEventListener('click', () => deleteSite(btn.dataset.id));
+    });
+  }
   const wardSiteSel = document.getElementById('ward-site');
   const deptSiteSel = document.getElementById('dept-site');
-  const opt = `<option value="">-- ${t('site')} --</option>` + sites.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+  const opt = `<option value="">-- ${t('site')} --</option>` + sites.map(s => `<option value="${escHtml(s.id)}">${escHtml(s.name)}</option>`).join('');
   if (wardSiteSel) wardSiteSel.innerHTML = opt;
   if (deptSiteSel) deptSiteSel.innerHTML = opt;
-}
-
-function escQ(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
 }
 
 function openAddSite() { siteEditId = null; document.getElementById('site-form').reset(); new bootstrap.Modal(document.getElementById('siteModal')).show(); }
@@ -213,14 +222,25 @@ async function deleteSite(id) {
 async function loadWards() {
   const wards = await apiGet('/settings/wards');
   const tbody = document.getElementById('wards-tbody');
-  if (tbody) tbody.innerHTML = wards.map(w => `
-    <tr>
-      <td>${w.name}</td><td>${w.site_name || '-'}</td>
-      <td>
-        <button class="btn btn-sm btn-outline-warning me-1" onclick="editWard('${w.id}','${escQ(w.name)}','${w.site_id||''}')"><i class="fas fa-edit"></i></button>
-        <button class="btn btn-sm btn-outline-danger" onclick="deleteWard('${w.id}')"><i class="fas fa-trash"></i></button>
-      </td>
-    </tr>`).join('') || `<tr><td colspan="3" class="text-center text-muted">${t('no_data')}</td></tr>`;
+  if (tbody) {
+    tbody.innerHTML = wards.map(w => `
+      <tr>
+        <td>${escHtml(w.name)}</td>
+        <td>${escHtml(w.site_name || '-')}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-warning me-1 js-edit-ward" data-id="${escHtml(w.id)}"><i class="fas fa-edit"></i></button>
+          <button class="btn btn-sm btn-outline-danger js-delete-ward" data-id="${escHtml(w.id)}"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`).join('') || `<tr><td colspan="3" class="text-center text-muted">${t('no_data')}</td></tr>`;
+
+    tbody.querySelectorAll('.js-edit-ward').forEach(btn => {
+      const ward = wards.find(w => w.id === btn.dataset.id);
+      if (ward) btn.addEventListener('click', () => editWard(ward.id, ward.name, ward.site_id || ''));
+    });
+    tbody.querySelectorAll('.js-delete-ward').forEach(btn => {
+      btn.addEventListener('click', () => deleteWard(btn.dataset.id));
+    });
+  }
 }
 function openAddWard() { wardEditId = null; document.getElementById('ward-form').reset(); new bootstrap.Modal(document.getElementById('wardModal')).show(); }
 function editWard(id, name, site_id) {
@@ -247,14 +267,25 @@ async function deleteWard(id) {
 async function loadDepartments() {
   const depts = await apiGet('/settings/departments');
   const tbody = document.getElementById('depts-tbody');
-  if (tbody) tbody.innerHTML = depts.map(d => `
-    <tr>
-      <td>${d.name}</td><td>${d.site_name || '-'}</td>
-      <td>
-        <button class="btn btn-sm btn-outline-warning me-1" onclick="editDept('${d.id}','${escQ(d.name)}','${d.site_id||''}')"><i class="fas fa-edit"></i></button>
-        <button class="btn btn-sm btn-outline-danger" onclick="deleteDept('${d.id}')"><i class="fas fa-trash"></i></button>
-      </td>
-    </tr>`).join('') || `<tr><td colspan="3" class="text-center text-muted">${t('no_data')}</td></tr>`;
+  if (tbody) {
+    tbody.innerHTML = depts.map(d => `
+      <tr>
+        <td>${escHtml(d.name)}</td>
+        <td>${escHtml(d.site_name || '-')}</td>
+        <td>
+          <button class="btn btn-sm btn-outline-warning me-1 js-edit-dept" data-id="${escHtml(d.id)}"><i class="fas fa-edit"></i></button>
+          <button class="btn btn-sm btn-outline-danger js-delete-dept" data-id="${escHtml(d.id)}"><i class="fas fa-trash"></i></button>
+        </td>
+      </tr>`).join('') || `<tr><td colspan="3" class="text-center text-muted">${t('no_data')}</td></tr>`;
+
+    tbody.querySelectorAll('.js-edit-dept').forEach(btn => {
+      const dept = depts.find(d => d.id === btn.dataset.id);
+      if (dept) btn.addEventListener('click', () => editDept(dept.id, dept.name, dept.site_id || ''));
+    });
+    tbody.querySelectorAll('.js-delete-dept').forEach(btn => {
+      btn.addEventListener('click', () => deleteDept(btn.dataset.id));
+    });
+  }
 }
 function openAddDept() { deptEditId = null; document.getElementById('dept-form').reset(); new bootstrap.Modal(document.getElementById('deptModal')).show(); }
 function editDept(id, name, site_id) {

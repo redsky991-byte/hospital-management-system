@@ -49,13 +49,13 @@ async function loadInvoices() {
     const tbody = document.getElementById('invoices-tbody');
     tbody.innerHTML = (data.invoices || []).map(i => `
       <tr>
-        <td><span class="badge bg-dark">${i.invoice_number}</span></td>
-        <td>${i.patient_name || 'N/A'}</td>
+        <td><span class="badge bg-dark">${escHtml(i.invoice_number)}</span></td>
+        <td>${escHtml(i.patient_name || 'N/A')}</td>
         <td>${formatCurrency(i.total_amount)}</td>
         <td>${formatCurrency(i.paid_amount)}</td>
         <td>${formatCurrency(i.balance)}</td>
-        <td><span class="badge bg-${statusColors[i.status] || 'secondary'}">${t(i.status) || i.status}</span></td>
-        <td>${i.due_date || '-'}</td>
+        <td><span class="badge bg-${statusColors[i.status] || 'secondary'}">${t(i.status) || escHtml(i.status)}</span></td>
+        <td>${escHtml(i.due_date || '-')}</td>
         <td>
           <button class="btn btn-sm btn-outline-info me-1" onclick="viewInvoice('${i.id}')"><i class="fas fa-eye"></i></button>
           <button class="btn btn-sm btn-outline-success me-1" onclick="openPayment('${i.id}', ${i.balance})"><i class="fas fa-dollar-sign"></i></button>
@@ -91,7 +91,7 @@ function renderLineItems() {
   const container = document.getElementById('line-items');
   container.innerHTML = lineItems.map((item, i) => `
     <div class="row g-2 mb-2 align-items-center">
-      <div class="col-5"><input type="text" class="form-control form-control-sm" placeholder="${t('description')}" value="${item.description}" oninput="updateItem(${i},'description',this.value)"></div>
+      <div class="col-5"><input type="text" class="form-control form-control-sm" placeholder="${t('description')}" value="${escHtml(item.description)}" oninput="updateItem(${i},'description',this.value)"></div>
       <div class="col-2"><input type="number" class="form-control form-control-sm" placeholder="${t('quantity')}" value="${item.quantity}" oninput="updateItem(${i},'quantity',this.value)" min="0.01" step="0.01"></div>
       <div class="col-3"><input type="number" class="form-control form-control-sm" placeholder="${t('unit_price')}" value="${item.unit_price}" oninput="updateItem(${i},'unit_price',this.value)" min="0" step="0.01"></div>
       <div class="col-1"><strong>${sym}${(item.quantity * item.unit_price).toFixed(2)}</strong></div>

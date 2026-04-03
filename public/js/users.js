@@ -1,6 +1,15 @@
 let userEditId = null;
 window._activeNav = 'users';
 
+function escHtml(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const user = checkAuth();
   if (user.role !== 'admin') { window.location.href = '/dashboard.html'; return; }
@@ -26,15 +35,15 @@ async function loadUsers() {
     const tbody = document.getElementById('users-tbody');
     tbody.innerHTML = users.map(u => `
       <tr>
-        <td>${u.name}</td>
-        <td>${u.email}</td>
-        <td><span class="badge bg-${u.role==='admin'?'danger':u.role==='doctor'?'primary':'info'}">${u.role}</span></td>
-        <td>${u.site_name || '-'}</td>
+        <td>${escHtml(u.name)}</td>
+        <td>${escHtml(u.email)}</td>
+        <td><span class="badge bg-${u.role==='admin'?'danger':u.role==='doctor'?'primary':'info'}">${escHtml(u.role)}</span></td>
+        <td>${escHtml(u.site_name || '-')}</td>
         <td><span class="badge bg-${u.is_active?'success':'secondary'}">${u.is_active ? t('active') : t('inactive')}</span></td>
         <td><span class="last-login-badge">${u.last_login_at ? new Date(u.last_login_at).toLocaleString() : '-'}</span></td>
         <td>
           <button class="btn btn-sm btn-outline-warning me-1" onclick="editUser('${u.id}')" title="${t('edit')}"><i class="fas fa-edit"></i></button>
-          <button class="btn btn-sm btn-outline-${u.is_active ? 'secondary' : 'success'} me-1" onclick="toggleActive('${u.id}', ${u.is_active})" title="${u.is_active ? t('deactivate') : t('activate')}">
+          <button class="btn btn-sm btn-outline-${u.is_active ? 'secondary' : 'success'} me-1" onclick="toggleActive('${u.id}', ${u.is_active ? 1 : 0})" title="${u.is_active ? t('deactivate') : t('activate')}">
             <i class="fas fa-${u.is_active ? 'ban' : 'check'}"></i>
           </button>
           <button class="btn btn-sm btn-outline-danger" onclick="deleteUser('${u.id}')" title="${t('delete')}"><i class="fas fa-trash"></i></button>
