@@ -1,6 +1,8 @@
 # MedCare Hospital Management System
 
-A complete, production-ready, multi-site Hospital Management System (HMS) built with Node.js, Express, SQLite, and Bootstrap 5.
+A complete, production-ready, multi-site Hospital Management System (HMS) built with **Python (Flask)** and SQLite, with a Bootstrap 5 frontend.
+
+> **The backend has been converted from Node.js/Express to Python/Flask.** The original Node.js files are still present for reference. Use `app.py` (Python) as the primary server.
 
 ---
 
@@ -37,23 +39,23 @@ A complete, production-ready, multi-site Hospital Management System (HMS) built 
 
 ## System Requirements
 
-- Node.js 18 or later
-- npm 8 or later
+- **Python 3.9 or later** (recommended: Python 3.11+)
+- pip (bundled with Python)
 - Any OS: Linux, macOS, Windows
 
 ---
 
 ## Step-by-Step Installation & Configuration Guide
 
-### Step 1 — Install Node.js
+### Step 1 — Install Python
 
-Download and install Node.js **v18 or later** from <https://nodejs.org>.
+Download and install Python **3.9 or later** from <https://python.org>.
 
 Verify:
 
 ```bash
-node -v   # should print v18.x or higher
-npm -v    # should print 8.x or higher
+python --version   # should print 3.9 or higher
+pip --version
 ```
 
 ---
@@ -70,10 +72,10 @@ cd hospital-management-system
 ### Step 3 — Install Dependencies
 
 ```bash
-npm install
+pip install -r requirements.txt
 ```
 
-This installs Express, better-sqlite3, jsonwebtoken, bcryptjs, cors, dotenv, and uuid.
+This installs Flask, flask-cors, PyJWT, bcrypt, and python-dotenv.
 
 ---
 
@@ -94,18 +96,16 @@ Open `.env` and set the following values:
 ```env
 PORT=3000
 JWT_SECRET=replace-this-with-a-long-random-string
-NODE_ENV=production
 ```
 
 | Variable     | Default       | Description                                              |
 |--------------|---------------|----------------------------------------------------------|
 | `PORT`       | `3000`        | TCP port the server listens on                           |
 | `JWT_SECRET` | —             | **Required.** Secret key used to sign authentication tokens. Use a random string of at least 32 characters. |
-| `NODE_ENV`   | `development` | Set to `production` for live deployments.                |
 
 > **Tip:** Generate a secure secret with:
 > ```bash
-> node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+> python -c "import secrets; print(secrets.token_hex(32))"
 > ```
 
 ---
@@ -113,7 +113,7 @@ NODE_ENV=production
 ### Step 5 — Start the Server
 
 ```bash
-npm start
+python app.py
 ```
 
 You should see:
