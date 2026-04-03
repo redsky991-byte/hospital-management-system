@@ -26,6 +26,9 @@ A complete, production-ready, multi-site Hospital Management System (HMS) built 
 - **Audit Logs** – Compliance-ready activity trail for all create/update/delete actions
 - **Site Configuration** – Add sites, wards, departments via UI — no code changes needed
 - **Multi-Site SaaS** – Single instance manages multiple hospital facilities
+- **Multi-Language** – 9 languages: English, German, French, Dutch, Urdu, Hindi, Arabic, Chinese (Simplified), Japanese; RTL auto-applied for Arabic & Urdu
+- **Multi-Currency** – 12 currencies (USD, EUR, GBP, AED, PKR, INR, CNY, JPY, SAR, TRY, CAD, AUD)
+- **Backup & Restore** – One-click database backup download and restore via the Settings UI
 - **Offline / PWA** – Service Worker caches assets for offline availability
 - **Print Support** – Clean print stylesheets on every procedure page
 - **Keyboard Shortcuts** – Global hotkeys for fast navigation and actions
@@ -91,12 +94,14 @@ Open `.env` and set the following values:
 ```env
 PORT=3000
 JWT_SECRET=replace-this-with-a-long-random-string
+NODE_ENV=production
 ```
 
-| Variable     | Default | Description                                              |
-|--------------|---------|----------------------------------------------------------|
-| `PORT`       | `3000`  | TCP port the server listens on                           |
-| `JWT_SECRET` | —       | **Required.** Secret key used to sign authentication tokens. Use a random string of at least 32 characters. |
+| Variable     | Default       | Description                                              |
+|--------------|---------------|----------------------------------------------------------|
+| `PORT`       | `3000`        | TCP port the server listens on                           |
+| `JWT_SECRET` | —             | **Required.** Secret key used to sign authentication tokens. Use a random string of at least 32 characters. |
+| `NODE_ENV`   | `development` | Set to `production` for live deployments.                |
 
 > **Tip:** Generate a secure secret with:
 > ```bash
@@ -159,6 +164,16 @@ All post-install configuration is done inside the app under **Settings** (Admin 
 2. Fill in name, email, password, select a role (**Admin / Doctor / Nurse**) and assign a site.
 3. Click **Save**.
 
+#### 7e — Configure System Settings
+
+1. Go to **Settings → Language & Region**.
+2. Choose the **Language** (English, German, French, Dutch, Urdu, Hindi, Arabic, Chinese, Japanese).
+3. Choose the **Currency** (USD, EUR, GBP, AED, PKR, INR, CNY, JPY, SAR, TRY, CAD, AUD).
+4. Choose the **Date Format** (YYYY-MM-DD, DD/MM/YYYY, MM/DD/YYYY).
+5. Click **Save Settings**.
+
+> Language and currency preferences are stored per-browser (localStorage). The system-wide defaults are saved in the database under `Settings → Language & Region`.
+
 ---
 
 ### Step 8 — Daily Workflow
@@ -187,10 +202,11 @@ All post-install configuration is done inside the app under **Settings** (Admin 
 
 ## Environment Variables Reference
 
-| Variable     | Required | Default | Description                        |
-|--------------|----------|---------|------------------------------------|
-| `PORT`       | No       | `3000`  | HTTP port to listen on             |
-| `JWT_SECRET` | Yes      | —       | Secret for signing JWT tokens      |
+| Variable     | Required | Default       | Description                        |
+|--------------|----------|---------------|------------------------------------|
+| `PORT`       | No       | `3000`        | HTTP port to listen on             |
+| `JWT_SECRET` | Yes      | —             | Secret for signing JWT tokens      |
+| `NODE_ENV`   | No       | `development` | Set to `production` for live deployments |
 
 ---
 
@@ -268,28 +284,114 @@ All shortcut keys work on any page once you are logged in. Press `?` at any time
 
 ## API Endpoints
 
-| Method | Endpoint                   | Description              | Roles        |
-|--------|----------------------------|--------------------------|--------------|
-| POST   | /api/auth/login            | Login, returns JWT       | Public       |
-| GET    | /api/auth/me               | Current user profile     | All          |
-| GET    | /api/patients              | List patients            | All          |
-| POST   | /api/patients              | Create patient           | All          |
-| PUT    | /api/patients/:id          | Update patient           | All          |
-| DELETE | /api/patients/:id          | Delete patient           | Admin        |
-| GET    | /api/appointments          | List appointments        | All          |
-| POST   | /api/appointments          | Create appointment       | All          |
-| GET    | /api/billing               | List invoices            | All          |
-| POST   | /api/billing               | Create invoice           | All          |
-| POST   | /api/billing/:id/payment   | Record payment           | Admin        |
-| GET    | /api/users                 | List users               | Admin        |
-| POST   | /api/users                 | Create user              | Admin        |
-| GET    | /api/audit                 | View audit logs          | Admin        |
-| GET    | /api/settings/sites        | List sites               | Admin        |
-| POST   | /api/settings/sites        | Add site                 | Admin        |
+| Method | Endpoint                        | Description                    | Roles        |
+|--------|---------------------------------|--------------------------------|--------------|
+| POST   | /api/auth/login                 | Login, returns JWT             | Public       |
+| GET    | /api/auth/me                    | Current user profile           | All          |
+| GET    | /api/patients                   | List patients                  | All          |
+| POST   | /api/patients                   | Create patient                 | All          |
+| PUT    | /api/patients/:id               | Update patient                 | All          |
+| DELETE | /api/patients/:id               | Delete patient                 | Admin        |
+| GET    | /api/appointments               | List appointments              | All          |
+| POST   | /api/appointments               | Create appointment             | All          |
+| PUT    | /api/appointments/:id           | Update appointment             | All          |
+| DELETE | /api/appointments/:id           | Delete appointment             | Admin        |
+| GET    | /api/billing                    | List invoices                  | All          |
+| POST   | /api/billing                    | Create invoice                 | All          |
+| PUT    | /api/billing/:id                | Update invoice                 | Admin        |
+| POST   | /api/billing/:id/payment        | Record payment                 | Admin        |
+| GET    | /api/users                      | List users                     | Admin        |
+| POST   | /api/users                      | Create user                    | Admin        |
+| PUT    | /api/users/:id                  | Update user                    | Admin        |
+| DELETE | /api/users/:id                  | Delete user                    | Admin        |
+| GET    | /api/audit                      | View audit logs                | Admin        |
+| GET    | /api/settings/system            | Get system settings            | Admin        |
+| PUT    | /api/settings/system            | Update language/currency/date  | Admin        |
+| GET    | /api/settings/backup            | Download database backup file  | Admin        |
+| POST   | /api/settings/restore           | Restore database from backup   | Admin        |
+| GET    | /api/settings/sites             | List sites                     | Admin        |
+| POST   | /api/settings/sites             | Add site                       | Admin        |
+| PUT    | /api/settings/sites/:id         | Update site                    | Admin        |
+| DELETE | /api/settings/sites/:id         | Delete site                    | Admin        |
+| GET    | /api/settings/wards             | List wards                     | Admin        |
+| POST   | /api/settings/wards             | Add ward                       | Admin        |
+| PUT    | /api/settings/wards/:id         | Update ward                    | Admin        |
+| DELETE | /api/settings/wards/:id         | Delete ward                    | Admin        |
+| GET    | /api/settings/departments       | List departments               | Admin        |
+| POST   | /api/settings/departments       | Add department                 | Admin        |
+| PUT    | /api/settings/departments/:id   | Update department              | Admin        |
+| DELETE | /api/settings/departments/:id   | Delete department              | Admin        |
 
 ---
 
-## Deployment
+## Multi-Language & Multi-Currency
+
+### Languages
+
+MedCare HMS ships with 9 built-in UI languages. Switch at any time using the language picker in the top-right corner, or via **Settings → Language & Region**.
+
+| Code | Language            | RTL |
+|------|---------------------|-----|
+| `en` | English             | No  |
+| `de` | German              | No  |
+| `fr` | French              | No  |
+| `nl` | Dutch               | No  |
+| `ur` | Urdu                | Yes |
+| `hi` | Hindi               | No  |
+| `ar` | Arabic              | Yes |
+| `zh` | Chinese (Simplified)| No  |
+| `ja` | Japanese            | No  |
+
+> RTL layout is automatically applied for Arabic and Urdu.
+
+### Currencies
+
+12 currencies are supported. The currency symbol is shown on all billing amounts.
+
+| Code  | Currency            | Symbol |
+|-------|---------------------|--------|
+| `USD` | US Dollar           | $      |
+| `EUR` | Euro                | €      |
+| `GBP` | British Pound       | £      |
+| `AED` | UAE Dirham          | د.إ    |
+| `PKR` | Pakistani Rupee     | ₨      |
+| `INR` | Indian Rupee        | ₹      |
+| `CNY` | Chinese Yuan        | ¥      |
+| `JPY` | Japanese Yen        | ¥      |
+| `SAR` | Saudi Riyal         | ﷼      |
+| `TRY` | Turkish Lira        | ₺      |
+| `CAD` | Canadian Dollar     | C$     |
+| `AUD` | Australian Dollar   | A$     |
+
+Language and currency selections are stored in the browser (`localStorage`) and are also saved as system defaults in the database via **Settings → Language & Region**.
+
+---
+
+## Backup & Restore
+
+MedCare HMS provides a one-click backup and restore interface under **Settings → Backup & Restore** (Admin only).
+
+### Download a Backup
+
+1. Go to **Settings → Backup & Restore**.
+2. Click **Download Backup**.
+3. A `.db` file (e.g. `hospital-backup-2025-06-01T12-00-00.db`) is downloaded to your machine.
+
+> The backup uses `better-sqlite3`'s `db.backup()` API for a WAL-safe, consistent snapshot — no data is missed even under write load.
+
+### Restore from Backup
+
+1. Go to **Settings → Backup & Restore**.
+2. Click **Choose Backup File** and select a previously downloaded `.db` file.
+3. Click **Restore Database**.
+4. The server validates the file, replaces the live database, and exits so a process manager (PM2 or systemd) can restart it automatically.
+5. Wait a few seconds, then reload the page.
+
+> ⚠️ **Restoring replaces ALL current data.** Always download a fresh backup before restoring.
+
+---
+
+
 
 ### Production checklist
 

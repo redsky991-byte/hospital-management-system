@@ -219,6 +219,22 @@
                     </div>
                   </div>
 
+                  <div class="step-item">
+                    <div class="step-circle">9</div>
+                    <div class="step-body">
+                      <h6>Set Language, Currency &amp; Date Format</h6>
+                      <p>Go to <strong>Settings → Language &amp; Region</strong> to choose your UI language (9 options), billing currency (12 options), and date display format.</p>
+                    </div>
+                  </div>
+
+                  <div class="step-item">
+                    <div class="step-circle">10</div>
+                    <div class="step-body">
+                      <h6>Schedule Regular Backups</h6>
+                      <p>Go to <strong>Settings → Backup &amp; Restore</strong> and click <em>Download Backup</em> to save a snapshot. Store backups off-server and automate with a cron job or PM2 cron feature.</p>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             </div>
@@ -393,6 +409,52 @@
               </div>
             </div>
 
+            <div class="col-lg-6">
+              <div class="card h-100">
+                <div class="card-header"><strong><i class="fas fa-language me-2 text-primary"></i>Language &amp; Currency</strong></div>
+                <div class="card-body">
+                  <p class="text-muted small mb-3">Localise the interface for your region (Admin only).</p>
+                  <ul class="list-unstyled">
+                    <li class="module-item">
+                      <div class="module-icon" style="background:#e8f0fe;color:#1a73e8"><i class="fas fa-globe"></i></div>
+                      <div><strong>Language</strong><br><span class="text-muted small">Choose from 9 UI languages: English, German, French, Dutch, Urdu, Hindi, Arabic, Chinese, Japanese. RTL layout is applied automatically for Arabic and Urdu.</span></div>
+                    </li>
+                    <li class="module-item">
+                      <div class="module-icon" style="background:#e8f0fe;color:#1a73e8"><i class="fas fa-coins"></i></div>
+                      <div><strong>Currency</strong><br><span class="text-muted small">Choose from 12 currencies (USD, EUR, GBP, AED, PKR, INR, CNY, JPY, SAR, TRY, CAD, AUD). The currency symbol is shown on all billing amounts.</span></div>
+                    </li>
+                    <li class="module-item">
+                      <div class="module-icon" style="background:#e8f0fe;color:#1a73e8"><i class="fas fa-calendar-alt"></i></div>
+                      <div><strong>Date Format</strong><br><span class="text-muted small">Select YYYY-MM-DD, DD/MM/YYYY, or MM/DD/YYYY as the system-wide date display format.</span></div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="card h-100">
+                <div class="card-header"><strong><i class="fas fa-database me-2 text-success"></i>Backup &amp; Restore</strong></div>
+                <div class="card-body">
+                  <p class="text-muted small mb-3">Protect your data with one-click backup and restore (Admin only).</p>
+                  <ul class="list-unstyled">
+                    <li class="module-item">
+                      <div class="module-icon" style="background:#e6f4ea;color:#188038"><i class="fas fa-download"></i></div>
+                      <div><strong>Download Backup</strong><br><span class="text-muted small">Go to <strong>Settings → Backup &amp; Restore</strong> and click <em>Download Backup</em>. A WAL-safe <code>.db</code> snapshot is downloaded to your machine.</span></div>
+                    </li>
+                    <li class="module-item">
+                      <div class="module-icon" style="background:#e6f4ea;color:#188038"><i class="fas fa-upload"></i></div>
+                      <div><strong>Restore Database</strong><br><span class="text-muted small">Click <em>Choose Backup File</em>, select a <code>.db</code> file, then click <em>Restore Database</em>. The server validates the file, replaces the database, and restarts automatically (requires PM2 or systemd).</span></div>
+                    </li>
+                  </ul>
+                  <div class="alert alert-warning py-2 mb-0 mt-2">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    Restoring replaces <strong>all</strong> current data. Download a fresh backup before restoring.
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
 
@@ -424,11 +486,69 @@
                         <td><span class="text-danger">required</span></td>
                         <td>Secret key for signing JWT tokens. Use a random string ≥ 32 characters.</td>
                       </tr>
+                      <tr>
+                        <td><code>NODE_ENV</code></td>
+                        <td><code>development</code></td>
+                        <td>Set to <code>production</code> for live deployments.</td>
+                      </tr>
                     </tbody>
                   </table>
                   <div class="alert alert-info py-2 mb-0">
                     <i class="fas fa-lightbulb me-1"></i>
                     Generate a strong secret: <code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mb-4">
+                <div class="card-header"><strong><i class="fas fa-language me-2 text-primary"></i>Language, Currency &amp; Date Format</strong></div>
+                <div class="card-body">
+                  <p class="text-muted small mb-3">Configure system-wide regional settings under <strong>Settings → Language &amp; Region</strong>.</p>
+                  <ol class="mb-0">
+                    <li class="mb-1">Log in as <strong>Admin</strong>.</li>
+                    <li class="mb-1">Go to <strong>Settings → Language &amp; Region</strong>.</li>
+                    <li class="mb-1">Select your <strong>Language</strong>:
+                      <span class="text-muted">English, German (de), French (fr), Dutch (nl), Urdu (ur), Hindi (hi), Arabic (ar), Chinese Simplified (zh), Japanese (ja).</span>
+                      RTL layout is applied automatically for Arabic and Urdu.
+                    </li>
+                    <li class="mb-1">Select your <strong>Currency</strong>:
+                      <span class="text-muted">USD, EUR, GBP, AED, PKR, INR, CNY, JPY, SAR, TRY, CAD, AUD.</span>
+                    </li>
+                    <li class="mb-1">Select your <strong>Date Format</strong>:
+                      <span class="text-muted">YYYY-MM-DD, DD/MM/YYYY, or MM/DD/YYYY.</span>
+                    </li>
+                    <li>Click <strong>Save Settings</strong>. The page reloads with the new locale applied.</li>
+                  </ol>
+                  <div class="alert alert-info py-2 mt-3 mb-0">
+                    <i class="fas fa-info-circle me-1"></i>
+                    Language and currency can also be changed instantly by any logged-in user using the pickers in the top-right corner. The selection is stored in the browser and does not affect other users.
+                  </div>
+                </div>
+              </div>
+
+              <div class="card mb-4">
+                <div class="card-header"><strong><i class="fas fa-database me-2 text-success"></i>Backup &amp; Restore</strong></div>
+                <div class="card-body">
+                  <p class="text-muted small mb-3">One-click database protection under <strong>Settings → Backup &amp; Restore</strong> (Admin only).</p>
+
+                  <h6 class="fw-semibold">Download a Backup</h6>
+                  <ol class="mb-3">
+                    <li class="mb-1">Go to <strong>Settings → Backup &amp; Restore</strong>.</li>
+                    <li class="mb-1">Click <strong>Download Backup</strong>.</li>
+                    <li>A timestamped <code>.db</code> file (e.g. <code>hospital-backup-2025-06-01T12-00-00.db</code>) is saved to your machine.</li>
+                  </ol>
+
+                  <h6 class="fw-semibold">Restore from a Backup</h6>
+                  <ol class="mb-3">
+                    <li class="mb-1">Go to <strong>Settings → Backup &amp; Restore</strong>.</li>
+                    <li class="mb-1">Click <strong>Choose Backup File</strong> and select a previously downloaded <code>.db</code> file.</li>
+                    <li class="mb-1">Click <strong>Restore Database</strong>.</li>
+                    <li>The server validates the file, replaces the live database, and exits. A process manager (PM2 or systemd) restarts it automatically. Wait a few seconds, then reload the page.</li>
+                  </ol>
+
+                  <div class="alert alert-warning py-2 mb-0">
+                    <i class="fas fa-exclamation-triangle me-1"></i>
+                    <strong>Warning:</strong> Restoring replaces <strong>all</strong> current data. Always download a fresh backup immediately before restoring.
                   </div>
                 </div>
               </div>
@@ -689,7 +809,7 @@
                   </h2>
                   <div id="faq3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
                     <div class="accordion-body text-muted small">
-                      The SQLite database is stored in <code>data/hospital.db</code>. Copy this file to a safe location regularly. You can automate this with a cron job or the PM2 cron feature.
+                      Use the built-in UI: go to <strong>Settings → Backup &amp; Restore</strong> and click <em>Download Backup</em>. A WAL-safe <code>.db</code> snapshot is downloaded to your machine. The raw database file also lives at <code>data/hospital.db</code> — you can copy it manually to a safe location or automate this with a cron job or the PM2 cron feature.
                     </div>
                   </div>
                 </div>
