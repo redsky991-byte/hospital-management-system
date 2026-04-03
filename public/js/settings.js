@@ -181,8 +181,10 @@ async function loadSites() {
         </td>
       </tr>`).join('') || `<tr><td colspan="4" class="text-center text-muted">${t('no_data')}</td></tr>`;
 
+    // Use a Map for O(1) lookup inside event listeners (avoids repeated .find())
+    const siteMap = new Map(sites.map(s => [s.id, s]));
     tbody.querySelectorAll('.js-edit-site').forEach(btn => {
-      const site = sites.find(s => s.id === btn.dataset.id);
+      const site = siteMap.get(btn.dataset.id);
       if (site) btn.addEventListener('click', () => editSite(site.id, site.name, site.address || '', site.phone || ''));
     });
     tbody.querySelectorAll('.js-delete-site').forEach(btn => {
@@ -233,8 +235,10 @@ async function loadWards() {
         </td>
       </tr>`).join('') || `<tr><td colspan="3" class="text-center text-muted">${t('no_data')}</td></tr>`;
 
+    // Use a Map for O(1) lookup inside event listeners
+    const wardMap = new Map(wards.map(w => [w.id, w]));
     tbody.querySelectorAll('.js-edit-ward').forEach(btn => {
-      const ward = wards.find(w => w.id === btn.dataset.id);
+      const ward = wardMap.get(btn.dataset.id);
       if (ward) btn.addEventListener('click', () => editWard(ward.id, ward.name, ward.site_id || ''));
     });
     tbody.querySelectorAll('.js-delete-ward').forEach(btn => {
@@ -278,8 +282,10 @@ async function loadDepartments() {
         </td>
       </tr>`).join('') || `<tr><td colspan="3" class="text-center text-muted">${t('no_data')}</td></tr>`;
 
+    // Use a Map for O(1) lookup inside event listeners
+    const deptMap = new Map(depts.map(d => [d.id, d]));
     tbody.querySelectorAll('.js-edit-dept').forEach(btn => {
-      const dept = depts.find(d => d.id === btn.dataset.id);
+      const dept = deptMap.get(btn.dataset.id);
       if (dept) btn.addEventListener('click', () => editDept(dept.id, dept.name, dept.site_id || ''));
     });
     tbody.querySelectorAll('.js-delete-dept').forEach(btn => {

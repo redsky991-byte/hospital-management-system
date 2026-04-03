@@ -71,7 +71,17 @@ function openNewInvoice() {
   lineItems = [];
   document.getElementById('invoice-form').reset();
   renderLineItems();
-  new bootstrap.Modal(document.getElementById('invoiceModal')).show();
+  // Set up event delegation on the modal (once) so it survives innerHTML rebuilds
+  const modal = document.getElementById('invoiceModal');
+  if (modal && !modal._lineItemsBound) {
+    modal._lineItemsBound = true;
+    modal.addEventListener('input', e => {
+      const input = e.target.closest('.line-item-input');
+      if (!input) return;
+      updateItem(Number(input.dataset.idx), input.dataset.field, input.value);
+    });
+  }
+  new bootstrap.Modal(modal).show();
 }
 
 function addLineItem() {
@@ -91,9 +101,9 @@ function renderLineItems() {
   const container = document.getElementById('line-items');
   container.innerHTML = lineItems.map((item, i) => `
     <div class="row g-2 mb-2 align-items-center">
-      <div class="col-5"><input type="text" class="form-control form-control-sm" placeholder="${t('description')}" value="${escHtml(item.description)}" oninput="updateItem(${i},'description',this.value)"></div>
-      <div class="col-2"><input type="number" class="form-control form-control-sm" placeholder="${t('quantity')}" value="${item.quantity}" oninput="updateItem(${i},'quantity',this.value)" min="0.01" step="0.01"></div>
-      <div class="col-3"><input type="number" class="form-control form-control-sm" placeholder="${t('unit_price')}" value="${item.unit_price}" oninput="updateItem(${i},'unit_price',this.value)" min="0" step="0.01"></div>
+      <div class="col-5"><input type="text" class="form-control form-control-sm line-item-input" placeholder="${t('description')}" value="${escHtml(item.description)}" data-idx="${i}" data-field="description"></div>
+      <div class="col-2"><input type="number" class="form-control form-control-sm line-item-input" placeholder="${t('quantity')}" value="${item.quantity}" data-idx="${i}" data-field="quantity" min="0.01" step="0.01"></div>
+      <div class="col-3"><input type="number" class="form-control form-control-sm line-item-input" placeholder="${t('unit_price')}" value="${item.unit_price}" data-idx="${i}" data-field="unit_price" min="0" step="0.01"></div>
       <div class="col-1"><strong>${sym}${(item.quantity * item.unit_price).toFixed(2)}</strong></div>
       <div class="col-1"><button class="btn btn-sm btn-danger" onclick="removeItem(${i})"><i class="fas fa-times"></i></button></div>
     </div>`).join('');

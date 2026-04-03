@@ -72,9 +72,12 @@ router.post('/restore', express.json({ limit: '50mb' }), (req, res) => {
 
     fs.writeFileSync(tmpPath, buffer, { flag: 'w' });
 
-    // Re-validate the staged file before replacing the live database
-    const stagedMagic = fs.readFileSync(tmpPath).slice(0, 16).toString('ascii');
-    if (!stagedMagic.startsWith('SQLite format 3')) {
+    // Re-validate the staged file using only the first 16 bytes (no full-file read)
+    const fd = fs.openSync(tmpPath, 'r');
+    const headerBuf = Buffer.alloc(16);
+    fs.readSync(fd, headerBuf, 0, 16, 0);
+    fs.closeSync(fd);
+    if (!headerBuf.toString('ascii').startsWith('SQLite format 3')) {
       fs.unlinkSync(tmpPath);
       return res.status(400).json({ error: 'Staged file validation failed' });
     }
@@ -92,7 +95,7 @@ router.post('/restore', express.json({ limit: '50mb' }), (req, res) => {
     if (fs.existsSync(dbPath)) fs.unlinkSync(dbPath);
     fs.renameSync(tmpPath, dbPath);
 
-    res.json({ message: 'Database restored successfully. Server will now restart.' });
+    res.json({ message: 'Database restored successfully. The server is restarting — please wait a moment, then reload the page. (Requires a process manager such as PM2 or systemd to auto-restart.)' });
     res.on('finish', () => {
       process.nextTick(() => process.exit(0));
     });
