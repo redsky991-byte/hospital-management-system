@@ -877,7 +877,9 @@
                         <code class="d-block p-2 bg-light rounded mt-1">server {<br>&nbsp;&nbsp;listen 80;<br>&nbsp;&nbsp;server_name yourdomain.com www.yourdomain.com;<br><br>&nbsp;&nbsp;location / {<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_pass http://localhost:3000;<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_http_version 1.1;<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_set_header Upgrade $http_upgrade;<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_set_header Connection 'upgrade';<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_set_header Host $host;<br>&nbsp;&nbsp;&nbsp;&nbsp;proxy_cache_bypass $http_upgrade;<br>&nbsp;&nbsp;}<br>}</code>
                         Enable and reload:
                         <code class="d-block p-2 bg-light rounded mt-1">sudo ln -s /etc/nginx/sites-available/medcare /etc/nginx/sites-enabled/<br>sudo nginx -t<br>sudo systemctl reload nginx</code>
-                        Now visit <strong>http://yourdomain.com</strong> — no port number needed.
+                        Now visit <strong>http://yourdomain.com</strong> — no port number needed.<br>
+                        <strong>Security:</strong> Remove the direct port 3000 firewall rule so traffic must go through Nginx:
+                        <code class="d-block p-2 bg-light rounded mt-1">sudo ufw delete allow 3000/tcp<br>sudo ufw reload</code>
                       </p>
                     </div>
                   </div>
@@ -945,7 +947,7 @@
                     <div class="step-circle">4</div>
                     <div class="step-body">
                       <h6>Set Environment Variables</h6>
-                      <p>In the same Node.js App Manager form, add environment variables: <code>PORT=3000</code> and <code>JWT_SECRET=&lt;your-strong-secret&gt;</code>. Save.</p>
+                      <p>In the same Node.js App Manager form, add environment variables: <code>PORT=3000</code> and a strong <code>JWT_SECRET</code> (use a random string of at least 32 characters — generate one with <code>node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"</code>). Save.</p>
                     </div>
                   </div>
 
@@ -1010,7 +1012,7 @@
                     <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>HTTPS enabled (Let's Encrypt or paid cert)</li>
                     <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>PM2 or process manager running</li>
                     <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Firewall configured (block direct port 3000 after Nginx)</li>
-                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Regular backups of <code>data/hospital.db</code> scheduled</li>
+                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Regular backups of <code>data/hospital.db</code> scheduled (e.g., daily cron: <code>0 2 * * * cp /var/www/medcare/data/hospital.db /backups/hospital-$(date +\%F).db</code>)</li>
                     <li><i class="fas fa-check-circle text-success me-2"></i>Hospital sites, wards, and departments added in Settings</li>
                   </ul>
                 </div>
