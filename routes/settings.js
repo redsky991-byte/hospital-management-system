@@ -8,7 +8,33 @@ const db = require('../database/db');
 const { authenticate, requireRole } = require('../middleware/authMiddleware');
 const { auditLog } = require('../middleware/auditMiddleware');
 
-router.use(authenticate, requireRole('admin'), auditLog);
+// All settings routes require authentication at minimum
+router.use(authenticate);
+
+// Read-only routes accessible to ALL authenticated users (needed by appointments, patients pages)
+router.get('/sites', (req, res) => { res.json(db.prepare('SELECT * FROM sites ORDER BY name').all()); });
+
+router.get('/wards', (req, res) => {
+  const { site_id } = req.query;
+  let query = 'SELECT w.*, s.name as site_name FROM wards w LEFT JOIN sites s ON w.site_id = s.id';
+  const params = [];
+  if (site_id) { query += ' WHERE w.site_id = ?'; params.push(site_id); }
+  query += ' ORDER BY w.name';
+  res.json(db.prepare(query).all(...params));
+});
+
+router.get('/departments', (req, res) => {
+  const { site_id } = req.query;
+  let query = 'SELECT d.*, s.name as site_name FROM departments d LEFT JOIN sites s ON d.site_id = s.id';
+  const params = [];
+  if (site_id) { query += ' WHERE d.site_id = ?'; params.push(site_id); }
+  query += ' ORDER BY d.name';
+  res.json(db.prepare(query).all(...params));
+});
+
+// Everything below requires admin role
+router.use(requireRole('admin'));
+router.use(auditLog);
 
 // System Settings
 router.get('/system', (req, res) => {
@@ -105,8 +131,7 @@ router.post('/restore', express.json({ limit: '50mb' }), (req, res) => {
   }
 });
 
-// Sites
-router.get('/sites', (req, res) => { res.json(db.prepare('SELECT * FROM sites ORDER BY name').all()); });
+// Sites (admin write operations)
 router.post('/sites', (req, res) => {
   const { name, address, phone } = req.body;
   if (!name) return res.status(400).json({ error: 'Site name required' });
@@ -124,15 +149,7 @@ router.delete('/sites/:id', (req, res) => {
   res.json({ message: 'Site deleted' });
 });
 
-// Wards
-router.get('/wards', (req, res) => {
-  const { site_id } = req.query;
-  let query = 'SELECT w.*, s.name as site_name FROM wards w LEFT JOIN sites s ON w.site_id = s.id';
-  const params = [];
-  if (site_id) { query += ' WHERE w.site_id = ?'; params.push(site_id); }
-  query += ' ORDER BY w.name';
-  res.json(db.prepare(query).all(...params));
-});
+// Wards (admin write operations)
 router.post('/wards', (req, res) => {
   const { name, site_id } = req.body;
   if (!name) return res.status(400).json({ error: 'Ward name required' });
@@ -150,15 +167,7 @@ router.delete('/wards/:id', (req, res) => {
   res.json({ message: 'Ward deleted' });
 });
 
-// Departments
-router.get('/departments', (req, res) => {
-  const { site_id } = req.query;
-  let query = 'SELECT d.*, s.name as site_name FROM departments d LEFT JOIN sites s ON d.site_id = s.id';
-  const params = [];
-  if (site_id) { query += ' WHERE d.site_id = ?'; params.push(site_id); }
-  query += ' ORDER BY d.name';
-  res.json(db.prepare(query).all(...params));
-});
+// Departments (admin write operations)
 router.post('/departments', (req, res) => {
   const { name, site_id } = req.body;
   if (!name) return res.status(400).json({ error: 'Department name required' });

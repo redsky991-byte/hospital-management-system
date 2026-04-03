@@ -6,7 +6,19 @@ const db = require('../database/db');
 const { authenticate, requireRole } = require('../middleware/authMiddleware');
 const { auditLog } = require('../middleware/auditMiddleware');
 
-router.use(authenticate, requireRole('admin'), auditLog);
+router.use(authenticate);
+router.use(auditLog);
+
+// Accessible to all authenticated users: list active doctors for appointment dropdowns
+router.get('/doctors', (req, res) => {
+  const doctors = db.prepare(
+    `SELECT id, name FROM users WHERE role = 'doctor' AND is_active = 1 ORDER BY name`
+  ).all();
+  res.json(doctors);
+});
+
+// All remaining user-management routes require admin role
+router.use(requireRole('admin'));
 
 router.get('/', (req, res) => {
   const users = db.prepare(`SELECT u.id, u.name, u.email, u.role, u.is_active, u.created_at, u.last_login_at, u.site_id, s.name as site_name

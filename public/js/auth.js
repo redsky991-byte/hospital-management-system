@@ -22,7 +22,7 @@ function renderNav(activeItem) {
     { href: 'dashboard.html', icon: 'fa-tachometer-alt', key: 'nav_dashboard', roles: ['admin','doctor','nurse'] },
     { href: 'patients.html', icon: 'fa-user-injured', key: 'nav_patients', roles: ['admin','doctor','nurse'] },
     { href: 'appointments.html', icon: 'fa-calendar-check', key: 'nav_appointments', roles: ['admin','doctor','nurse'] },
-    { href: 'billing.html', icon: 'fa-file-invoice-dollar', key: 'nav_billing', roles: ['admin'] },
+    { href: 'billing.html', icon: 'fa-file-invoice-dollar', key: 'nav_billing', roles: ['admin', 'nurse', 'doctor'] },
     { href: 'users.html', icon: 'fa-users-cog', key: 'nav_users', roles: ['admin'] },
     { href: 'audit.html', icon: 'fa-clipboard-list', key: 'nav_audit', roles: ['admin'] },
     { href: 'settings.html', icon: 'fa-cog', key: 'nav_settings', roles: ['admin'] },

@@ -1,7 +1,17 @@
 let currentPage = 1;
 let editingId = null;
+let printCurrentPatientId = null;
 
 window._activeNav = 'patients';
+
+function escHtml(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
 
 document.addEventListener('DOMContentLoaded', async () => {
   checkAuth();
@@ -13,6 +23,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   document.getElementById('search-input')?.addEventListener('input', debounce(() => { currentPage = 1; loadPatients(); }, 400));
   document.getElementById('save-patient-btn')?.addEventListener('click', savePatient);
+  document.getElementById('print-patient-btn')?.addEventListener('click', () => {
+    if (printCurrentPatientId) printPatient(printCurrentPatientId);
+  });
+
+  // Event delegation for table action buttons
+  document.getElementById('patients-tbody')?.addEventListener('click', e => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    if (action === 'view') viewPatient(id);
+    else if (action === 'edit') editPatient(id);
+    else if (action === 'print') printPatient(id);
+    else if (action === 'delete') deletePatient(id);
+  });
 });
 
 function debounce(fn, ms) { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; }
@@ -22,8 +47,8 @@ async function loadSitesAndWards() {
     const [sites, wards] = await Promise.all([apiGet('/settings/sites'), apiGet('/settings/wards')]);
     const siteSelect = document.getElementById('patient-site');
     const wardSelect = document.getElementById('patient-ward');
-    if (siteSelect) siteSelect.innerHTML = '<option value="">Select Site</option>' + sites.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
-    if (wardSelect) wardSelect.innerHTML = '<option value="">Select Ward</option>' + wards.map(w => `<option value="${w.id}">${w.name}</option>`).join('');
+    if (siteSelect) siteSelect.innerHTML = '<option value="">Select Site</option>' + sites.map(s => `<option value="${escHtml(s.id)}">${escHtml(s.name)}</option>`).join('');
+    if (wardSelect) wardSelect.innerHTML = '<option value="">Select Ward</option>' + wards.map(w => `<option value="${escHtml(w.id)}">${escHtml(w.name)}</option>`).join('');
   } catch (e) { console.error(e); }
 }
 
@@ -34,19 +59,20 @@ async function loadPatients() {
     const tbody = document.getElementById('patients-tbody');
     tbody.innerHTML = data.patients.map(p => `
       <tr>
-        <td><span class="badge bg-secondary">${p.patient_number}</span></td>
-        <td>${p.first_name} ${p.last_name}</td>
-        <td>${p.gender || '-'}</td>
-        <td>${p.date_of_birth || '-'}</td>
-        <td>${p.phone || '-'}</td>
-        <td>${p.blood_group || '-'}</td>
-        <td>${p.site_name || '-'}</td>
+        <td><span class="badge bg-secondary">${escHtml(p.patient_number)}</span></td>
+        <td>${escHtml(p.first_name)} ${escHtml(p.last_name)}</td>
+        <td>${escHtml(p.gender || '-')}</td>
+        <td>${escHtml(p.date_of_birth || '-')}</td>
+        <td>${escHtml(p.phone || '-')}</td>
+        <td>${escHtml(p.blood_group || '-')}</td>
+        <td>${escHtml(p.site_name || '-')}</td>
         <td>
-          <button class="btn btn-sm btn-outline-info me-1" onclick="viewPatient('${p.id}')"><i class="fas fa-eye"></i></button>
-          <button class="btn btn-sm btn-outline-warning me-1" onclick="editPatient('${p.id}')"><i class="fas fa-edit"></i></button>
-          <button class="btn btn-sm btn-outline-danger" onclick="deletePatient('${p.id}')"><i class="fas fa-trash"></i></button>
+          <button class="btn btn-sm btn-outline-info me-1" data-action="view" data-id="${escHtml(p.id)}" title="View"><i class="fas fa-eye"></i></button>
+          <button class="btn btn-sm btn-outline-warning me-1" data-action="edit" data-id="${escHtml(p.id)}" title="Edit"><i class="fas fa-edit"></i></button>
+          <button class="btn btn-sm btn-outline-secondary me-1" data-action="print" data-id="${escHtml(p.id)}" title="Print Card"><i class="fas fa-print"></i></button>
+          <button class="btn btn-sm btn-outline-danger" data-action="delete" data-id="${escHtml(p.id)}" title="Delete"><i class="fas fa-trash"></i></button>
         </td>
-      </tr>`).join('') || '<tr><td colspan="8" class="text-center text-muted">No patients found</td></tr>';
+      </tr>`).join('') || '<tr><td colspan="8" class="text-center text-muted py-4">No patients found</td></tr>';
     renderPagination(data.total, data.limit, data.page, 'patients-pagination', (p) => { currentPage = p; loadPatients(); });
   } catch (e) { console.error(e); }
 }
@@ -55,25 +81,41 @@ function renderPagination(total, limit, page, elId, cb) {
   const el = document.getElementById(elId);
   if (!el) return;
   const pages = Math.ceil(total / limit);
-  el.innerHTML = Array.from({ length: pages }, (_, i) => `<li class="page-item${i+1===page?' active':''}"><a class="page-link" href="#" onclick="event.preventDefault();(${cb.toString()})(${i+1})">${i+1}</a></li>`).join('');
+  if (pages <= 1) { el.innerHTML = ''; return; }
+  const prevDis = page === 1 ? ' disabled' : '';
+  const nextDis = page === pages ? ' disabled' : '';
+  el.innerHTML = `<li class="page-item${prevDis}"><a class="page-link" href="#" data-page="${page - 1}">«</a></li>` +
+    Array.from({ length: pages }, (_, i) =>
+      `<li class="page-item${i + 1 === page ? ' active' : ''}"><a class="page-link" href="#" data-page="${i + 1}">${i + 1}</a></li>`
+    ).join('') +
+    `<li class="page-item${nextDis}"><a class="page-link" href="#" data-page="${page + 1}">»</a></li>`;
+  el.querySelectorAll('a.page-link').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const p = parseInt(a.dataset.page);
+      if (p >= 1 && p <= pages) cb(p);
+    });
+  });
 }
 
 async function viewPatient(id) {
   try {
+    printCurrentPatientId = id;
     const p = await apiGet('/patients/' + id);
     document.getElementById('view-content').innerHTML = `
       <div class="row g-3">
-        <div class="col-md-6"><strong>Patient #:</strong> ${p.patient_number}</div>
-        <div class="col-md-6"><strong>Name:</strong> ${p.first_name} ${p.last_name}</div>
-        <div class="col-md-6"><strong>DOB:</strong> ${p.date_of_birth || '-'}</div>
-        <div class="col-md-6"><strong>Gender:</strong> ${p.gender || '-'}</div>
-        <div class="col-md-6"><strong>Phone:</strong> ${p.phone || '-'}</div>
-        <div class="col-md-6"><strong>Email:</strong> ${p.email || '-'}</div>
-        <div class="col-md-6"><strong>Blood Group:</strong> ${p.blood_group || '-'}</div>
-        <div class="col-md-6"><strong>Site:</strong> ${p.site_name || '-'}</div>
-        <div class="col-md-6"><strong>Ward:</strong> ${p.ward_name || '-'}</div>
-        <div class="col-12"><strong>Address:</strong> ${p.address || '-'}</div>
-        <div class="col-12"><strong>Allergies:</strong> ${p.allergies || '-'}</div>
+        <div class="col-md-6"><strong>Patient #:</strong> <span class="badge bg-primary fs-6">${escHtml(p.patient_number)}</span></div>
+        <div class="col-md-6"><strong>Name:</strong> ${escHtml(p.first_name)} ${escHtml(p.last_name)}</div>
+        <div class="col-md-6"><strong>Date of Birth:</strong> ${escHtml(p.date_of_birth || '-')}</div>
+        <div class="col-md-6"><strong>Gender:</strong> ${escHtml(p.gender || '-')}</div>
+        <div class="col-md-6"><strong>Phone:</strong> ${escHtml(p.phone || '-')}</div>
+        <div class="col-md-6"><strong>Email:</strong> ${escHtml(p.email || '-')}</div>
+        <div class="col-md-6"><strong>Blood Group:</strong> <span class="badge bg-danger">${escHtml(p.blood_group || '-')}</span></div>
+        <div class="col-md-6"><strong>Site:</strong> ${escHtml(p.site_name || '-')}</div>
+        <div class="col-md-6"><strong>Ward:</strong> ${escHtml(p.ward_name || '-')}</div>
+        <div class="col-12"><strong>Address:</strong> ${escHtml(p.address || '-')}</div>
+        <div class="col-12"><strong>Allergies:</strong> <span class="text-danger">${escHtml(p.allergies || 'None')}</span></div>
+        <div class="col-md-6"><strong>Registered:</strong> ${escHtml(p.created_at || '-')}</div>
       </div>`;
     new bootstrap.Modal(document.getElementById('viewPatientModal')).show();
   } catch (e) { alert('Error loading patient'); }
@@ -129,3 +171,62 @@ async function deletePatient(id) {
   try { await apiDelete('/patients/' + id); loadPatients(); }
   catch (e) { alert(t('error') + ': ' + e.message); }
 }
+
+async function printPatient(id) {
+  try {
+    const p = await apiGet('/patients/' + id);
+    const w = window.open('', '_blank', 'width=800,height=700');
+    w.document.write(`<!DOCTYPE html><html><head><title>Patient Card - ${escHtml(p.patient_number)}</title>
+      <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+      <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .patient-id-box { border: 3px solid #0d6efd; border-radius: 8px; padding: 15px; text-align: center; }
+        .patient-id-number { font-size: 2rem; font-weight: bold; color: #0d6efd; letter-spacing: 2px; }
+        @media print { .no-print { display: none !important; } }
+      </style>
+    </head><body>
+      <div class="container">
+        <div class="text-center border-bottom pb-3 mb-4">
+          <h3>&#x1F3E5; MedCare Hospital Management System</h3>
+          <h5 class="text-muted">Patient Registration Card</h5>
+          <small class="text-muted">Printed: ${new Date().toLocaleString()}</small>
+        </div>
+        <div class="row">
+          <div class="col-8">
+            <table class="table table-bordered table-sm">
+              <tr class="table-primary"><th colspan="2" class="text-center">Patient Information</th></tr>
+              <tr><th width="35%">Patient ID</th><td><strong>${escHtml(p.patient_number)}</strong></td></tr>
+              <tr><th>Full Name</th><td>${escHtml(p.first_name)} ${escHtml(p.last_name)}</td></tr>
+              <tr><th>Date of Birth</th><td>${escHtml(p.date_of_birth || '—')}</td></tr>
+              <tr><th>Gender</th><td>${escHtml(p.gender || '—')}</td></tr>
+              <tr><th>Blood Group</th><td><strong>${escHtml(p.blood_group || '—')}</strong></td></tr>
+              <tr><th>Phone</th><td>${escHtml(p.phone || '—')}</td></tr>
+              <tr><th>Email</th><td>${escHtml(p.email || '—')}</td></tr>
+              <tr><th>Address</th><td>${escHtml(p.address || '—')}</td></tr>
+              <tr><th>Ward</th><td>${escHtml(p.ward_name || '—')}</td></tr>
+              <tr><th>Site / Branch</th><td>${escHtml(p.site_name || '—')}</td></tr>
+              <tr class="table-danger"><th>Allergies</th><td><strong>${escHtml(p.allergies || 'None')}</strong></td></tr>
+              <tr><th>Registered On</th><td>${escHtml(p.created_at || '—')}</td></tr>
+            </table>
+          </div>
+          <div class="col-4">
+            <div class="patient-id-box mb-3">
+              <div class="text-muted small mb-1">PATIENT CODE</div>
+              <div class="patient-id-number">${escHtml(p.patient_number)}</div>
+            </div>
+            <div class="border rounded p-3 text-center">
+              <div class="text-muted small">Blood Group</div>
+              <div style="font-size:1.8rem;font-weight:bold;color:#dc3545">${escHtml(p.blood_group || '—')}</div>
+            </div>
+          </div>
+        </div>
+        <div class="no-print text-center mt-4">
+          <button onclick="window.print()" class="btn btn-primary me-2"><i class="fas fa-print me-1"></i> Print</button>
+          <button onclick="window.close()" class="btn btn-secondary">Close</button>
+        </div>
+      </div>
+    </body></html>`);
+    w.document.close();
+  } catch (e) { alert('Error printing patient: ' + e.message); }
+}
+
