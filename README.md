@@ -216,7 +216,7 @@ All shortcut keys work on any page once you are logged in. Press `?` at any time
 | Shortcut       | Action                              |
 |----------------|-------------------------------------|
 | `N`            | Open "New / Add" modal on current page |
-| `Ctrl + F` / `/`    | Focus the search box           |
+| `/` or `F`     | Focus the search box           |
 | `Escape`       | Close any open modal                |
 | `Ctrl + P`     | Print current view                  |
 | `?`            | Show / hide keyboard shortcut help  |

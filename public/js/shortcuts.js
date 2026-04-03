@@ -32,6 +32,52 @@
     h: 'help.html'
   };
 
+  /* ---- Inject shortcut modal once the DOM is ready ---- */
+  function injectModal() {
+    if (document.getElementById('shortcutModal')) return; // already present (help.html)
+    const div = document.createElement('div');
+    div.innerHTML = `
+      <div class="modal fade" id="shortcutModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title"><i class="fas fa-keyboard me-2"></i>Keyboard Shortcuts</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <h6 class="text-muted text-uppercase small mb-2">Navigation (press G then&hellip;)</h6>
+              <div class="row g-1 mb-3">
+                <div class="col-6"><kbd>G</kbd> <kbd>D</kbd> &mdash; Dashboard</div>
+                <div class="col-6"><kbd>G</kbd> <kbd>P</kbd> &mdash; Patients</div>
+                <div class="col-6"><kbd>G</kbd> <kbd>A</kbd> &mdash; Appointments</div>
+                <div class="col-6"><kbd>G</kbd> <kbd>B</kbd> &mdash; Billing</div>
+                <div class="col-6"><kbd>G</kbd> <kbd>U</kbd> &mdash; Users</div>
+                <div class="col-6"><kbd>G</kbd> <kbd>L</kbd> &mdash; Audit Logs</div>
+                <div class="col-6"><kbd>G</kbd> <kbd>S</kbd> &mdash; Settings</div>
+                <div class="col-6"><kbd>G</kbd> <kbd>H</kbd> &mdash; Help</div>
+              </div>
+              <h6 class="text-muted text-uppercase small mb-2">Actions</h6>
+              <div class="row g-1">
+                <div class="col-6"><kbd>N</kbd> &mdash; Add / New</div>
+                <div class="col-6"><kbd>/</kbd> or <kbd>F</kbd> &mdash; Search</div>
+                <div class="col-6"><kbd>Ctrl</kbd>+<kbd>P</kbd> &mdash; Print</div>
+                <div class="col-6"><kbd>?</kbd> &mdash; This help</div>
+                <div class="col-6"><kbd>Esc</kbd> &mdash; Close modal</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    document.body.appendChild(div.firstElementChild);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectModal);
+  } else {
+    injectModal();
+  }
+
+  /* ---- Keyboard handler ---- */
   let gPressed = false;
   let gTimer = null;
 
@@ -47,7 +93,6 @@
   }
 
   document.addEventListener('keydown', function (e) {
-    // Skip if a modifier key other than Shift is held (except Ctrl+P handled below)
     const ctrlOrMeta = e.ctrlKey || e.metaKey;
 
     // Ctrl+P → print
@@ -60,7 +105,6 @@
     // Skip all other shortcuts when input/textarea is focused
     if (isInputFocused()) return;
 
-    // Skip when a modal is open and a key is pressed that isn't Escape
     const openModal = document.querySelector('.modal.show');
 
     // Escape → close top-most open Bootstrap modal
@@ -72,7 +116,7 @@
       return;
     }
 
-    // Ignore keyboard shortcuts when a modal is open (prevents accidental navigation)
+    // Ignore other shortcuts when a modal is open
     if (openModal) return;
 
     const key = e.key.toLowerCase();
@@ -88,7 +132,6 @@
 
     if (key === 'g') {
       gPressed = true;
-      // Auto-reset after 1.5 s if no second key is pressed
       gTimer = setTimeout(resetG, 1500);
       return;
     }
