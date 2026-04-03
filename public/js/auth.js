@@ -26,7 +26,8 @@ function renderNav(activeItem) {
     { href: 'users.html', icon: 'fa-users-cog', label: 'Users', roles: ['admin'] },
     { href: 'audit.html', icon: 'fa-clipboard-list', label: 'Audit Logs', roles: ['admin'] },
     { href: 'settings.html', icon: 'fa-cog', label: 'Settings', roles: ['admin'] },
-    { href: 'about.html', icon: 'fa-info-circle', label: 'About', roles: ['admin','doctor','nurse'] }
+    { href: 'about.html', icon: 'fa-info-circle', label: 'About', roles: ['admin','doctor','nurse'] },
+    { href: 'help.html', icon: 'fa-question-circle', label: 'Help', roles: ['admin','doctor','nurse'] }
   ];
   nav.innerHTML = items.filter(i => i.roles.includes(role)).map(i => `
     <li class="nav-item">

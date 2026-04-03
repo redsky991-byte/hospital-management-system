@@ -509,6 +509,21 @@ body {
 .text-primary { color: var(--primary) !important; }
 .bg-primary { background-color: var(--primary) !important; }
 
+/* ===== KBD / SHORTCUT BADGE ===== */
+.kbd-badge, kbd {
+  display: inline-block;
+  background: #1e2a3a;
+  color: #fff;
+  font-family: monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 5px;
+  border-bottom: 2px solid rgba(0,0,0,0.35);
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
 .alert {
   border-radius: 10px;
   font-size: 0.88rem;
